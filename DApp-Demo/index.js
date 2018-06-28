@@ -29,9 +29,13 @@ function init() {
 }
 
 function sendBet() {
-    console.log($('input[name=team_bet]:checked').val());
+    var betValue=$('input[name=team_bet]:checked').val()
+    var jq = window.jQuery;
+
+    console.log(betValue);
     document.getElementById('bet_div').style.display = 'none'
     document.getElementById('set_div').style.display = 'block'
+    $('#qrcode').qrcode(betValue);
 }
 
 //construct AppChain transaction structure

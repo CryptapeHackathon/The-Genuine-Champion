@@ -9,6 +9,17 @@
     <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/popper.js/1.12.5/umd/popper.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <!-- <script src="https://cdn.bootcss.com/qrcode-generator/1.4.0/qrcode.min.js"></script> -->
+    <script type="text/javascript" src="src/reedsolomon.js"></script>
+    <script type="text/javascript" src="src/qrbase.js"></script>
+
+    <!-- <script type="text/javascript" src="src/decode.js"></script> -->
+    <!-- <script type="text/javascript" src="src/qrdecode.js"></script> -->
+
+    <script type="text/javascript" src="src/encode.js"></script>
+    <script type="text/javascript" src="src/qrcode.js"></script>
+    <!-- <script type="text/javascript" src="src/render.table.js"></script> -->
+    <script type="text/javascript" src="src/render.canvas.js"></script>
 
 </head>
 
@@ -24,25 +35,26 @@
         <input type="radio" name="team_bet" value="japan" />
         <label for="genderf">日本队</label>
         <br>
-    <div class="text-center">
-        <button type="button" class="btn btn-large btn-primary" id="send_bet">下注！</button>
-    </div>
+        <div class="text-center">
+            <button type="button" class="btn btn-large btn-primary" id="send_bet">下注！</button>
+        </div>
 
     </div>
-    
+
     <div id="set_div" class="text-center">
         <p>中国队对日本队，比赛结果是！</p>
-        
+
         <input type="radio" name="team_set" value="china" checked/>
         <label for="genderm">中国队</label>
         <input type="radio" name="team_set" value="japan" />
         <label for="genderf">日本队</label>
         <br>
-    <div class="text-center">
-        <button type="button" class="btn btn-large btn-primary" id="send_result">确认结果！</button>
+        <div class="text-center">
+            <button type="button" class="btn btn-large btn-primary" id="send_result">确认结果！</button>
+        </div>
     </div>
-    </div>
-    
+
+    <div class="text-center" id="qrcode"></div>
 
     <script src="index.js"></script>
 </body>
