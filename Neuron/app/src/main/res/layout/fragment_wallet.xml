@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/default_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:background="@color/white">
+        <org.nervos.neuron.custom.TitleBar
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/colorPrimary"
+            app:title="@string/wallet_title"
+            app:isShowLeft="true"
+            app:left_img="@drawable/list"
+            app:isShowRight="true"
+            app:right_img="@drawable/add"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="50dp"
+            android:elevation="5dp"
+            android:translationZ="5dp"
+            android:background="@drawable/rectangle_border_gray_corner">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/wallet_photo"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/default_margin"
+                android:src="@drawable/wallet_photo"
+                app:civ_border_width="1dp"
+                app:civ_border_color="@color/default_gray_d5"/>
+
+            <TextView
+                android:id="@+id/wallet_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/default_black"
+                android:text="Watson"
+                android:layout_marginTop="5dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/wallet_photo"/>
+
+            <TextView
+                android:id="@+id/wallet_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/default_black"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:layout_marginStart="@dimen/default_margin"
+                android:layout_marginEnd="@dimen/default_margin"
+                android:layout_marginTop="5dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/wallet_name"/>
+            
+            <LinearLayout
+                android:id="@+id/wallet_layout"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_alignParentBottom="true">
+
+                <FrameLayout
+                    android:id="@+id/wallet_receive_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="200">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/receive_token"
+                        android:drawablePadding="10dp"
+                        android:layout_gravity="center"
+                        android:text="@string/receive_token"
+                        android:textColor="@color/default_black"
+                        android:textSize="14sp"/>
+                </FrameLayout>
+
+                <View
+                    android:id="@+id/wallet_line"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:background="@color/default_gray_c"/>
+
+                <FrameLayout
+                    android:id="@+id/wallet_token_management_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="200">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/token_manage"
+                        android:drawablePadding="10dp"
+                        android:layout_gravity="center"
+                        android:text="@string/token_manage"
+                        android:textColor="@color/default_black"
+                        android:textSize="14sp"/>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/default_gray_c"
+                android:layout_above="@id/wallet_layout"/>
+
+        </RelativeLayout>
+    </FrameLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/default_margin">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/token_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp" />
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+</LinearLayout>
