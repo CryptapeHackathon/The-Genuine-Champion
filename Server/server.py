@@ -11,8 +11,12 @@ app = Flask(__name__)
 redis_conn = redis.StrictRedis()
 
 
-def bad_request(message):
-    return make_response(json.dumps({'error': message}), 400)
+def bad_request(uuid, message):
+    return make_response(json.dumps({'uuid': uuid, 'error': message}), 400)
+
+
+def not_found(uuid, message='not found'):
+    return make_response(json.dumps({'uuid': uuid, 'error': message}), 404)
 
 
 @app.route('/tx/info/', methods=['POST'])
@@ -21,13 +25,13 @@ def add_tx_info():
     uuid_hex = uuid.uuid4().hex
     chain = data.get('chain')
     if not chain:
-        return bad_request('Invalid chain type')
+        return bad_request('null', 'Invalid chain type')
     expire = int(data.get('expire') or 3600)
     if expire > 3600:
         expire = 3600
     transaction = data.get('transaction')
     if not isinstance(transaction, dict):
-        return bad_request('Invalid transaction data')
+        return bad_request('null', 'Invalid transaction data')
 
     data['uuid'] = uuid_hex
     data['expire'] = expire
@@ -45,26 +49,35 @@ def add_tx_info():
 def get_tx_info(uuid):
     redis_key = 'tx:info:{uuid}'.format(uuid=uuid)
     redis_value = redis_conn.get(redis_key)
-    return redis_value or (404, 'not found')
+    return redis_value or not_found(uuid)
 
 
 @app.route('/tx/status/<uuid>', methods=['PUT'])
 def update_tx_status(uuid):
+    redis_key = 'tx:status:{uuid}'.format(uuid=uuid)
+    redis_value = redis_conn.get(redis_key)
+    if not redis_value:
+        return not_found(uuid)
+    redis_data = json.loads(redis_value)
+
     data = json.loads(request.data)
     status = data.get('status')
     error = data.get('error')
     transaction = data.get('transaction')
     if status == 'success':
-        if not isinstance(transaction, dict):
-            return bad_request('Invalid transaction data(tx_hash)')
+        if not isinstance(transaction, dict) or 'hash' not in transaction:
+            return bad_request(uuid, 'Invalid transaction data(tx_hash)')
     elif status in ['denied', 'faied']:
         if not error:
-            return bad_request('Error message is required!')
+            return bad_request(uuid, 'Error message is required!')
     else:
         return bad_request('Invalid status')
 
-    redis_key = 'tx:status:{uuid}'.format(uuid=uuid)
-    redis_value = json.dumps(data)
+    redis_data['status'] = status
+    redis_data['error'] = error
+    redis_data['transaction'] = transaction
+
+    redis_value = json.dumps(redis_data)
     redis_conn.set(redis_key, redis_value)
     return json.dumps({'uuid': uuid})
 
@@ -73,7 +86,7 @@ def update_tx_status(uuid):
 def get_tx_status(uuid):
     redis_key = 'tx:status:{uuid}'.format(uuid=uuid)
     redis_value = redis_conn.get(redis_key)
-    return redis_value or (404, 'not found')
+    return redis_value or not_found(uuid)
 
 
 if __name__ == '__main__':
