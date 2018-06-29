@@ -1,4 +1,4 @@
-package org.nervos.neuron.item;
+package org.nervos.neuron.remote.response;
 
 import android.text.TextUtils;
 
@@ -6,7 +6,7 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-public class TransactionRequest {
+public class TransactionInfo {
 
     private static final BigInteger TOKENDecimal = new BigInteger("1000000000000000000");
 
@@ -22,14 +22,20 @@ public class TransactionRequest {
 
     public String from;
     public String to;
-    public int nonce;
-    private int quota = -1;
+    public long nonce;
+    private long quota = -1;
     public String data;
     private String value;
-    public int chainId;
+    public long chainId;
     public int version;
     private String gasLimit;
     private String gasPrice;
+
+    public TransactionInfo(String to, String value) {
+        this.to = to;
+        this.value = BigInteger.valueOf((long)(Double.parseDouble(value)*10000))
+                .multiply(TOKENDecimal).divide(BigInteger.valueOf(10000)).toString();
+    }
 
     public double getValue() {
         return new BigInteger(value).multiply(BigInteger.valueOf(10000))
@@ -55,7 +61,19 @@ public class TransactionRequest {
         return gasPrice;
     }
 
+    public void setGasLimit(String gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public void setQuota(long quota) {
+        this.quota = quota;
+    }
+
+    public void setGasPrice(String gasPrice) {
+        this.gasPrice = gasPrice;
+    }
+
     public boolean isEthereum() {
-        return !TextUtils.isEmpty(gasPrice);
+        return !TextUtils.isEmpty(gasLimit);
     }
 }

@@ -15,4 +15,9 @@
     </string-array>
 
 
+    <string-array name="token_category">
+        <item>ETH</item>
+        <item>NOS</item>
+    </string-array>
+
 </resources>

@@ -20,6 +20,7 @@ import org.nervos.neuron.R;
 import org.nervos.neuron.dialog.SimpleDialog;
 import org.nervos.neuron.item.WalletItem;
 import org.nervos.neuron.util.Blockies;
+import org.nervos.neuron.util.ConstantUtil;
 import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.crypto.AESCrypt;
@@ -40,8 +41,6 @@ import rx.schedulers.Schedulers;
 
 public class AppWebActivity extends BaseActivity {
 
-    public static final String EXTRA_PAYLOAD = "extra_payload";
-    public static final String EXTRA_CHAIN = "extra_chain";
     public static final String EXTRA_URL = "extra_url";
     private static final int REQUEST_CODE = 0x01;
     public static final int RESULT_CODE_SUCCESS = 0x02;
@@ -185,8 +184,8 @@ public class AppWebActivity extends BaseActivity {
                 startActivity(new Intent(mActivity, AddWalletActivity.class));
             } else {
                 Intent intent = new Intent(mActivity, PayTokenActivity.class);
-                intent.putExtra(EXTRA_PAYLOAD, tx);
-                intent.putExtra(EXTRA_CHAIN, WebAppUtil.getChainItem());
+                intent.putExtra(ConstantUtil.EXTRA_PAYLOAD, tx);
+                intent.putExtra(ConstantUtil.EXTRA_CHAIN, WebAppUtil.getChainItem());
                 startActivityForResult(intent, REQUEST_CODE);
             }
         }

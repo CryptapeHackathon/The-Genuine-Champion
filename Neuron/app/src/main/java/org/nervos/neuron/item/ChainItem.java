@@ -3,11 +3,13 @@ package org.nervos.neuron.item;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.nervos.neuron.util.ConstantUtil;
+
 import java.util.List;
 
 public class ChainItem implements Parcelable{
 
-    public int chainId = -1;
+    public int chainId = ConstantUtil.ETH_CHAIN_ID;
     public String httpProvider;
     public String blockViewer;
     public String name;

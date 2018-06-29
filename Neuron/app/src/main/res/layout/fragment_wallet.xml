@@ -99,17 +99,17 @@
                     android:background="@color/default_gray_c"/>
 
                 <FrameLayout
-                    android:id="@+id/wallet_token_management_layout"
+                    android:id="@+id/wallet_qr_scan_layout"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="200">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/token_manage"
+                        android:drawableStart="@drawable/scan"
                         android:drawablePadding="10dp"
                         android:layout_gravity="center"
-                        android:text="@string/token_manage"
+                        android:text="@string/qr_scan"
                         android:textColor="@color/default_black"
                         android:textSize="14sp"/>
                 </FrameLayout>

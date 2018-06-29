@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="@color/default_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.nervos.neuron.custom.TitleBar
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/colorPrimary"
+        app:title="@string/title_set_value"
+        app:isShowLeft="true"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="10dp"
+        android:paddingStart="@dimen/default_margin"
+        android:paddingEnd="@dimen/default_margin"
+        android:background="@android:color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/token_category"
+            android:textColor="@color/font_black"
+            android:textSize="14sp"/>
+
+        <ImageView
+            android:id="@+id/triangle_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/triangle"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/spinner_token_category"
+            android:layout_marginStart="5dp"
+            android:background="@android:color/white"
+            android:layout_toStartOf="@id/triangle_spinner"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:entries="@array/token_category"/>
+
+    </RelativeLayout>
+
+    <View style="@style/separateLineLong"
+        android:layout_marginStart="@dimen/default_margin"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_horizontal"
+        android:paddingStart="@dimen/default_margin"
+        android:paddingEnd="@dimen/default_margin"
+        android:background="@android:color/white"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/amount"
+            android:textColor="@color/font_black"
+            android:textSize="15sp"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/edit_set_token_value"
+            android:layout_marginStart="5dp"
+            android:background="@android:color/white"
+            android:gravity="end|center_vertical"
+            android:hint="@string/set_value"
+            android:textSize="14sp"
+            android:textColor="@color/default_black"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/default_gray_c"/>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/set_value_button"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:background="@drawable/button_corner_gray_shape"
+        android:text="@string/ok"
+        android:textColor="@color/default_gray_9"
+        android:textSize="15sp"/>
+
+</LinearLayout>

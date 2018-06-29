@@ -58,6 +58,28 @@ public class WalletManageActivity extends BaseActivity {
 
 
     private void initListener() {
+
+        findViewById(R.id.change_password).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mActivity, ChangePasswordActivity.class));
+            }
+        });
+
+        findViewById(R.id.token_management).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mActivity, TokenManageActivity.class));
+            }
+        });
+
+        updatePassword();
+        exportKeyStore();
+        initDeleteWallet();
+
+    }
+
+    private void updatePassword() {
         walletNameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,13 +110,9 @@ public class WalletManageActivity extends BaseActivity {
                 simpleDialog.show();
             }
         });
-        findViewById(R.id.change_password).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(mActivity, ChangePasswordActivity.class));
-            }
-        });
+    }
 
+    private void exportKeyStore() {
         findViewById(R.id.export_keystore).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,7 +137,9 @@ public class WalletManageActivity extends BaseActivity {
                 simpleDialog.show();
             }
         });
+    }
 
+    private void initDeleteWallet() {
         findViewById(R.id.delete_wallet_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,8 +173,8 @@ public class WalletManageActivity extends BaseActivity {
                 deleteDialog.show();
             }
         });
-
     }
+
 
     private void generateKeystore(String password) {
         showProgressBar(R.string.generating);

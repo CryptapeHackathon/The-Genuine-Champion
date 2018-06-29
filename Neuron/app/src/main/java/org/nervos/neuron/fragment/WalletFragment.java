@@ -26,6 +26,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.nervos.neuron.R;
 import org.nervos.neuron.activity.AddWalletActivity;
+import org.nervos.neuron.activity.AppWebActivity;
+import org.nervos.neuron.activity.PayTokenActivity;
+import org.nervos.neuron.activity.QrCodeActivity;
 import org.nervos.neuron.activity.ReceiveQrCodeActivity;
 import org.nervos.neuron.activity.TokenManageActivity;
 import org.nervos.neuron.activity.TransferActivity;
@@ -34,36 +37,51 @@ import org.nervos.neuron.custom.TitleBar;
 import org.nervos.neuron.dialog.DialogUtil;
 import org.nervos.neuron.dialog.TokenTransferDialog;
 import org.nervos.neuron.event.TokenRefreshEvent;
-import org.nervos.neuron.event.WalletSaveEvent;
+import org.nervos.neuron.item.ChainItem;
 import org.nervos.neuron.item.TokenItem;
 import org.nervos.neuron.item.WalletItem;
+import org.nervos.neuron.remote.QRCodeService;
+import org.nervos.neuron.remote.response.TransactionInfo;
+import org.nervos.neuron.remote.response.TransactionInfoResponse;
+import org.nervos.neuron.service.EthRpcService;
+import org.nervos.neuron.service.NervosRpcService;
 import org.nervos.neuron.service.WalletService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.LogUtil;
+import org.nervos.neuron.util.ConstantUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 import org.nervos.neuron.util.db.SharePrefUtil;
-import org.nervos.web3j.protobuf.ConvertStrByte;
-import org.nervos.web3j.utils.Numeric;
+import org.nervos.neuron.util.permission.PermissionUtil;
+import org.nervos.neuron.util.permission.RuntimeRationale;
+import org.nervos.neuron.util.web.WebAppUtil;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.google.protobuf.ByteString;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.Permission;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class WalletFragment extends BaseFragment {
 
     public static final String TAG = WalletFragment.class.getName();
+    private static final int REQUEST_CODE = 0x01;
 
     private TextView walletNameText;
     private TextView addressText;
     private FrameLayout receiveLayout;
-    private FrameLayout tokenManageLayout;
+    private FrameLayout qrCodeScanLayout;
     private TitleBar titleBar;
     private RecyclerView tokenRecycler;
     private CircleImageView photoImage;
@@ -73,6 +91,8 @@ public class WalletFragment extends BaseFragment {
     private List<TokenItem> tokenItemList = new ArrayList<>();
     private List<String> walletNameList = new ArrayList<>();
     private WalletItem walletItem;
+    private Retrofit retrofit;
+    private TransactionInfo transactionInfo;
 
 
     @Nullable
@@ -83,7 +103,7 @@ public class WalletFragment extends BaseFragment {
         addressText = view.findViewById(R.id.wallet_address);
         tokenRecycler = view.findViewById(R.id.token_list);
         receiveLayout = view.findViewById(R.id.wallet_receive_layout);
-        tokenManageLayout = view.findViewById(R.id.wallet_token_management_layout);
+        qrCodeScanLayout = view.findViewById(R.id.wallet_qr_scan_layout);
         titleBar = view.findViewById(R.id.title);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         photoImage = view.findViewById(R.id.wallet_photo);
@@ -95,10 +115,18 @@ public class WalletFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
         initWalletData(true);
+        initRetrofit();
         initAdapter();
         initListener();
         initTitleBarListener();
         initRefresh();
+    }
+
+    private void initRetrofit() {
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.douban.com/v2/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
     }
 
     private void initWalletData(boolean showProgress) {
@@ -137,7 +165,17 @@ public class WalletFragment extends BaseFragment {
 
     private void initListener() {
         receiveLayout.setOnClickListener(v -> startActivity(new Intent(getActivity(), ReceiveQrCodeActivity.class)));
-        tokenManageLayout.setOnClickListener(v -> startActivity(new Intent(getActivity(), TokenManageActivity.class)));
+        qrCodeScanLayout.setOnClickListener(v -> {
+            AndPermission.with(getContext())
+                .runtime().permission(Permission.Group.CAMERA)
+                .rationale(new RuntimeRationale())
+                .onGranted(permissions -> {
+                    Intent intent = new Intent(getActivity(), QrCodeActivity.class);
+                    startActivityForResult(intent, REQUEST_CODE);
+                })
+                .onDenied(permissions -> PermissionUtil.showSettingDialog(getContext(), permissions))
+                .start();
+        });
         photoImage.setOnClickListener(v -> gotoWalletManagePage());
         addressText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,6 +189,54 @@ public class WalletFragment extends BaseFragment {
             }
         });
     }
+
+    private void handleQrCode(String value) {
+        try {
+            transactionInfo = new Gson().fromJson(value, TransactionInfo.class);
+            startPayTokenPage(transactionInfo);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            showProgressCircle();
+            QRCodeService qrCodeService = retrofit.create(QRCodeService.class);
+            qrCodeService.getTransactionInfo(value)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Response<TransactionInfoResponse>>() {
+                    @Override
+                    public void onCompleted() {
+                        dismissProgressBar();
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        dismissProgressBar();
+                    }
+                    @Override
+                    public void onNext(Response<TransactionInfoResponse> response) {
+                        if (response != null && response.body() != null) {
+                            transactionInfo = response.body().transaction;
+                            startPayTokenPage(transactionInfo);
+                        }
+                    }
+                });
+        }
+    }
+
+    private void startPayTokenPage(TransactionInfo transactionInfo) {
+        ChainItem chainItem;
+        if (transactionInfo.isEthereum()) {
+            chainItem = new ChainItem(ConstantUtil.ETH_CHAIN_ID,
+                    ConstantUtil.ETH_MAIN_NET, ConstantUtil.ETH_NODE_IP);
+        } else {
+            chainItem = new ChainItem(1,
+                    ConstantUtil.NERVOS_CHAIN_NAME, ConstantUtil.NERVOS_NODE_IP);
+        }
+        Intent intent = new Intent(getActivity(), PayTokenActivity.class);
+        intent.putExtra(ConstantUtil.EXTRA_PAYLOAD, new Gson().toJson(transactionInfo));
+        intent.putExtra(ConstantUtil.EXTRA_CHAIN, chainItem);
+        startActivity(intent);
+    }
+
 
     private void gotoWalletManagePage() {
         startActivity(new Intent(getActivity(), WalletManageActivity.class));
@@ -287,5 +373,20 @@ public class WalletFragment extends BaseFragment {
         void onItemClick(View view, int position);
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            if (data != null && data.getExtras() != null) {
+                Bundle bundle = data.getExtras();
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                    handleQrCode(bundle.getString(CodeUtils.RESULT_STRING));
+                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                    Toast.makeText(getContext(), R.string.qrcode_handle_fail, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
 
 }

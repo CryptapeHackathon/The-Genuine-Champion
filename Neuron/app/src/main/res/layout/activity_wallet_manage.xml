@@ -100,7 +100,24 @@
             android:ellipsize="end"
             android:textSize="16sp"
             android:textColor="@color/default_gray_9"/>
+
     </RelativeLayout>
+
+    <View style="@style/separateLineLong"
+        android:layout_marginStart="@dimen/default_margin"/>
+
+    <TextView
+        android:id="@+id/token_management"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:drawableEnd="@drawable/arrow"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/default_margin"
+        android:paddingRight="@dimen/default_margin"
+        android:background="@color/white"
+        android:text="@string/token_manage"
+        android:textSize="16sp"
+        android:textColor="@color/font_black"/>
 
     <View style="@style/separateLineLong"/>
 

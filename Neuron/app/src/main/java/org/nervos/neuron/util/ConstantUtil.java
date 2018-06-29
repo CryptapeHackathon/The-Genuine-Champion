@@ -1,5 +1,6 @@
 package org.nervos.neuron.util;
 
+import org.nervos.neuron.util.bip44.PublicKey;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
@@ -7,9 +8,11 @@ import java.math.BigInteger;
 public class ConstantUtil {
 
     public static final String ETH = "ETH";
+    public static final String NOS = "NOS";
 
     public static final BigInteger ETHDecimal = new BigInteger("1000000000000000000");
     public static final String ETH_MAIN_NET = "Ethereum Mainnet";
+    public static final int ETH_CHAIN_ID = -1;
     public static final String SOURCE_CODE_GITHUB_URL = "https://github.com/cryptape/Neuron-Android";
 
     // transaction list page config information
@@ -24,9 +27,11 @@ public class ConstantUtil {
     public static final String INNER_URL = "http://47.97.171.140:8866/";
 
     public static final BigInteger NervosDecimal = new BigInteger("100000000000000000");
-    public static final String NERVOS_NODE_IP = "http://47.97.108.229:1337";
-    public static final String ETH_NODE_IP = "https://mainnet.infura.io/h3iIzGIN6msu3KeUrdlt";
-//    public static final String ETH_NODE_IP = "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk";
+    public static final String NERVOS_CHAIN_NAME = "Nervos Chain";
+    public static final long DEFAULT_QUATO = 1000000;
+    public static final String NERVOS_NODE_IP = "http://47.94.105.230:1337";
+//    public static final String ETH_NODE_IP = "https://mainnet.infura.io/h3iIzGIN6msu3KeUrdlt";
+    public static final String ETH_NODE_IP = "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk";
 
 
     public static final BigInteger GAS_LIMIT = Numeric.toBigInt("0x23280");
@@ -40,6 +45,12 @@ public class ConstantUtil {
     public static final String BALANCEOF_HASH = "70a08231";
 
     public static final long VALID_BLOCK_NUMBER_DIFF = 80L;
+
+
+
+
+    public static final String EXTRA_PAYLOAD = "extra_payload";
+    public static final String EXTRA_CHAIN = "extra_chain";
 
 
 

@@ -16,11 +16,13 @@ public class BaseFragment extends Fragment {
 
     private View rootView;
     private View mProgressView;
+    private View mProgressCircleView;
 
     public void onDestroy() {
         super.onDestroy();
         rootView = null;
         mProgressView = null;
+        mProgressCircleView = null;
     }
 
     /**
@@ -56,6 +58,32 @@ public class BaseFragment extends Fragment {
             ((ViewGroup)rootView).removeView(mProgressView);
         }
         mProgressView = null;
+        rootView = null;
+    }
+
+    /**
+     * show Progress circle
+     */
+
+    protected void showProgressCircle() {
+        if (mProgressCircleView == null) {
+            mProgressCircleView = LayoutInflater.from(getActivity()).inflate(R.layout.progressbar_circle, null);
+            rootView = getActivity().getWindow().getDecorView();
+            FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+            fl.gravity = Gravity.CENTER;
+
+            ((ViewGroup)rootView).addView(mProgressCircleView, 1, fl);
+        }
+    }
+
+    /**
+     * hide Progress circle
+     */
+    protected void dismissProgressCircle() {
+        if (rootView != null && mProgressCircleView != null) {
+            ((ViewGroup)rootView).removeView(mProgressCircleView);
+        }
+        mProgressCircleView = null;
         rootView = null;
     }
 

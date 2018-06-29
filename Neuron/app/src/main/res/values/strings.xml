@@ -67,6 +67,7 @@
     <string name="resume">恢复</string>
     <string name="message_permission_rationale">申请下列权限以保证应用可以正常运行:\n\n%1$s</string>
     <string name="scan_qrcode">扫描二维码</string>
+    <string name="title_set_value">设置金额</string>
     <string name="share_keystore">分享Keystore</string>
     <string name="password_suggestion">密码包含大写字母、小写字母、数字、特殊符号中的至少三类，且长度在8到50之间</string>
     <string name="empty_no_token_data">您还没有Token数据</string>
@@ -101,6 +102,7 @@
     <string name="wallet_title">钱包</string>
     <string name="receive_token">收款</string>
     <string name="token_manage">资产管理</string>
+    <string name="qr_scan">扫一扫</string>
     <string name="settings_title">设置</string>
     <string name="wallet_password_error">钱包密码错误</string>
     <string name="password">密码</string>
@@ -156,4 +158,8 @@
     <string name="keystore">Keystore</string>
     <string name="nmemonic">助记词</string>
     <string name="private_key">私钥</string>
+    <string name="set_amount">设置金额</string>
+    <string name="set_value">设置金额</string>
+    <string name="amount">金额</string>
+    <string name="token_category">币种</string>
 </resources>

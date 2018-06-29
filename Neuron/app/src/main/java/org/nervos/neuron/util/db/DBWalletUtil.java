@@ -11,6 +11,7 @@ import org.nervos.neuron.R;
 import org.nervos.neuron.item.ChainItem;
 import org.nervos.neuron.item.TokenItem;
 import org.nervos.neuron.item.WalletItem;
+import org.nervos.neuron.util.ConstantUtil;
 import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.crypto.AESCrypt;
 
@@ -233,7 +234,7 @@ public class DBWalletUtil extends DBUtil {
      */
     public static WalletItem addOriginTokenToWallet(Context context, WalletItem walletItem) {
         List<TokenItem> tokenItemList = new ArrayList<>();
-        tokenItemList.add(new TokenItem(ETH, R.drawable.ether_big, 0, -1));
+        tokenItemList.add(new TokenItem(ETH, R.drawable.ether_big, 0, ConstantUtil.ETH_CHAIN_ID));
         walletItem.tokenItems = tokenItemList;
 
         List<ChainItem> chainItemList = DBChainUtil.getAllChain(context);

@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
 
+import org.nervos.neuron.util.ConstantUtil;
+
 public class TokenItem implements Parcelable{
 
     private static int NERVOS_DECIMAL = 18;
@@ -59,7 +61,7 @@ public class TokenItem implements Parcelable{
         this.contractAddress = tokenEntity.address;
         this.avatar = tokenEntity.logo.src;
         this.decimals = tokenEntity.decimals;
-        this.chainId = -1;
+        this.chainId = ConstantUtil.ETH_CHAIN_ID;
     }
 
     @Override
