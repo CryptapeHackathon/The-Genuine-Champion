@@ -4,9 +4,10 @@
 
 > An easy cross-platform transaction signing solution
 
-* Easy signing process via QR code.
-* One private key only, encrypted and offlined
+* Easy signing via QR code
 * Supports both Nervos AppChain and Ethereum
+* Private key is stored in Neuron only, encrypted and offlined
+* Quick integration with your project
 
 
 [GitHub](https://github.com/CryptapeHackathon/The-Genuine-Champion)

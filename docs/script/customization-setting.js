@@ -4,7 +4,7 @@
 
 var customization = {
 
-    name: 'Nervos Network', // name of this document
+    name: 'UniSign', // name of this document
 
-    homepage: `${default_language}/nervos.md`,// the home page, extension name '.md' cannot be omitted.
+    homepage: `${default_language}/unisign.md`,// the home page, extension name '.md' cannot be omitted.
 }
