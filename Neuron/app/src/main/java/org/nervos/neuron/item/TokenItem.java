@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
 
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 
 public class TokenItem implements Parcelable{
 
@@ -61,7 +61,7 @@ public class TokenItem implements Parcelable{
         this.contractAddress = tokenEntity.address;
         this.avatar = tokenEntity.logo.src;
         this.decimals = tokenEntity.decimals;
-        this.chainId = ConstantUtil.ETH_CHAIN_ID;
+        this.chainId = ConstUtil.ETH_CHAIN_ID;
     }
 
     @Override

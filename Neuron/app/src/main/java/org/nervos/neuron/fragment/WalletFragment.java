@@ -39,10 +39,10 @@ import org.nervos.neuron.item.TokenItem;
 import org.nervos.neuron.item.WalletItem;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.remote.response.TransactionInfoResponse;
-import org.nervos.neuron.service.NervosHttpService;
+import org.nervos.neuron.service.QrCodeService;
 import org.nervos.neuron.service.WalletService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 import org.nervos.neuron.util.db.SharePrefUtil;
@@ -59,15 +59,10 @@ import com.yanzhenjie.permission.Permission;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.Request;
 import okhttp3.Response;
-import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class WalletFragment extends BaseFragment {
 
@@ -186,14 +181,7 @@ public class WalletFragment extends BaseFragment {
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
             showProgressCircle();
-            Request request = new Request.Builder().url(value).build();
-            Observable.fromCallable(new Callable<Response>() {
-                @Override
-                public Response call() throws IOException {
-                    return NervosHttpService.getHttpClient().newCall(request).execute();
-                }
-            }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+            QrCodeService.getTransactionInfo(value)
                 .subscribe(new Subscriber<Response>() {
                     @Override
                     public void onCompleted() {
@@ -238,15 +226,15 @@ public class WalletFragment extends BaseFragment {
     private void startPayTokenPage(TransactionInfo transactionInfo) {
         ChainItem chainItem;
         if (transactionInfo.isEthereum()) {
-            chainItem = new ChainItem(ConstantUtil.ETH_CHAIN_ID,
-                    ConstantUtil.ETH_MAIN_NET, ConstantUtil.ETH_NODE_IP);
+            chainItem = new ChainItem(ConstUtil.ETH_CHAIN_ID,
+                    ConstUtil.ETH_MAIN_NET, ConstUtil.ETH_NODE_IP);
         } else {
-            chainItem = new ChainItem(ConstantUtil.DEFAULT_NERVOS_DEFAULT_CHAIN_ID,
-                    ConstantUtil.NERVOS_CHAIN_NAME, ConstantUtil.NERVOS_NODE_IP);
+            chainItem = new ChainItem(ConstUtil.DEFAULT_NERVOS_DEFAULT_CHAIN_ID,
+                    ConstUtil.NERVOS_CHAIN_NAME, ConstUtil.NERVOS_NODE_IP);
         }
         Intent intent = new Intent(getActivity(), PayTokenActivity.class);
-        intent.putExtra(ConstantUtil.EXTRA_PAYLOAD, new Gson().toJson(transactionInfo));
-        intent.putExtra(ConstantUtil.EXTRA_CHAIN, chainItem);
+        intent.putExtra(ConstUtil.EXTRA_PAYLOAD, new Gson().toJson(transactionInfo));
+        intent.putExtra(ConstUtil.EXTRA_CHAIN, chainItem);
         startActivity(intent);
     }
 

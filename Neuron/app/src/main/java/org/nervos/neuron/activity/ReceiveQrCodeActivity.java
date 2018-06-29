@@ -20,7 +20,7 @@ import org.nervos.neuron.item.WalletItem;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.service.EthRpcService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 
 import java.math.BigInteger;
@@ -83,7 +83,7 @@ public class ReceiveQrCodeActivity extends BaseActivity {
     }
 
     private void handleEthTransaction() {
-        transactionInfo.setGasLimit(ConstantUtil.GAS_LIMIT.toString());
+        transactionInfo.setGasLimit(ConstUtil.GAS_LIMIT.toString());
         showProgressCircle();
         EthRpcService.getEthGasPrice()
             .subscribeOn(Schedulers.io())
@@ -115,10 +115,10 @@ public class ReceiveQrCodeActivity extends BaseActivity {
             String category = data.getStringExtra(SetAmountActivity.EXTRA_CATEGORY);
             amountText.setText(String.format("%s %s", value, category));
             transactionInfo = new TransactionInfo(walletItem.address, value);
-            if (ConstantUtil.ETH.equalsIgnoreCase(category)) {
+            if (ConstUtil.ETH.equalsIgnoreCase(category)) {
                 handleEthTransaction();
             } else {
-                transactionInfo.setQuota(ConstantUtil.DEFAULT_QUATO);
+                transactionInfo.setQuota(ConstUtil.DEFAULT_QUATO);
                 setQrCodeImage(new Gson().toJson(transactionInfo));
             }
         }

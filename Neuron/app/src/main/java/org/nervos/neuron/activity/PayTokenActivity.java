@@ -19,12 +19,11 @@ import org.nervos.neuron.remote.request.TransactionResult;
 import org.nervos.neuron.remote.request.TransactionResultRequest;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.item.WalletItem;
-import org.nervos.neuron.remote.response.TransactionInfoResponse;
-import org.nervos.neuron.service.NervosHttpService;
 import org.nervos.neuron.service.NervosRpcService;
 import org.nervos.neuron.service.EthRpcService;
+import org.nervos.neuron.service.QrCodeService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.crypto.AESCrypt;
@@ -35,14 +34,8 @@ import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.Callable;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
@@ -74,12 +67,12 @@ public class PayTokenActivity extends BaseActivity {
     }
 
     private void initData() {
-        String payload = getIntent().getStringExtra(ConstantUtil.EXTRA_PAYLOAD);
+        String payload = getIntent().getStringExtra(ConstUtil.EXTRA_PAYLOAD);
         if (!TextUtils.isEmpty(payload)) {
             transactionInfo = new Gson().fromJson(payload, TransactionInfo.class);
         }
         walletItem = DBWalletUtil.getCurrentWallet(mActivity);
-        chainItem = getIntent().getParcelableExtra(ConstantUtil.EXTRA_CHAIN);
+        chainItem = getIntent().getParcelableExtra(ConstUtil.EXTRA_CHAIN);
         if (chainItem.chainId >= 0 && !TextUtils.isEmpty(chainItem.httpProvider)) {
             NervosRpcService.init(mActivity, chainItem.httpProvider);
         }
@@ -143,7 +136,7 @@ public class PayTokenActivity extends BaseActivity {
         findViewById(R.id.pay_reject).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resultRequest.status = ConstantUtil.TRANSACTION_DENIED;
+                resultRequest.status = ConstUtil.TRANSACTION_DENIED;
                 submitPayStatus();
 
                 setResult(AppWebActivity.RESULT_CODE_CANCEL);
@@ -239,7 +232,7 @@ public class PayTokenActivity extends BaseActivity {
                     if (TextUtils.isEmpty(transactionInfo.uuid)) {
                         gotoSignFail(e.getMessage());
                     } else {
-                        resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                        resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                         resultRequest.error = e.getMessage();
                         submitPayStatus();
                     }
@@ -253,7 +246,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignSuccess(ethSendTransaction.getTransactionHash());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
+                            resultRequest.status = ConstUtil.TRANSACTION_SUCCESS;
                             resultRequest.transaction = new TransactionResult
                                     (ethSendTransaction.getTransactionHash());
                             submitPayStatus();
@@ -266,7 +259,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(ethSendTransaction.getError().getMessage());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = ethSendTransaction.getError().getMessage();
                             submitPayStatus();
                         }
@@ -276,7 +269,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(getString(R.string.transfer_fail));
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = getString(R.string.transfer_fail);
                             submitPayStatus();
                         }
@@ -300,7 +293,7 @@ public class PayTokenActivity extends BaseActivity {
                     if (TextUtils.isEmpty(transactionInfo.uuid)) {
                         gotoSignFail(e.getMessage());
                     } else {
-                        resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                        resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                         resultRequest.error = e.getMessage();
                         submitPayStatus();
                     }
@@ -315,7 +308,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignSuccess(ethSendTransaction.getSendTransactionResult().getHash());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
+                            resultRequest.status = ConstUtil.TRANSACTION_SUCCESS;
                             resultRequest.transaction = new TransactionResult
                                     (ethSendTransaction.getSendTransactionResult().getHash());
                             submitPayStatus();
@@ -329,7 +322,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(ethSendTransaction.getError().getMessage());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = ethSendTransaction.getError().getMessage();
                             submitPayStatus();
                         }
@@ -339,7 +332,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(getString(R.string.transfer_fail));
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = getString(R.string.transfer_fail);
                             submitPayStatus();
                         }
@@ -365,19 +358,7 @@ public class PayTokenActivity extends BaseActivity {
 
     private void submitPayStatus() {
         showProgressCircle();
-        MediaType mediaType = MediaType.parse("application/json");
-        RequestBody requestBody = RequestBody.create(mediaType, new Gson().toJson(resultRequest));
-        Request request = new Request.Builder()
-                .put(requestBody)
-                .url(String.format(ConstantUtil.SERVER_SUBMIT_STATUS_URL, transactionInfo.uuid))
-                .build();
-        Observable.fromCallable(new Callable<Response>() {
-            @Override
-            public Response call() throws IOException {
-                return NervosHttpService.getHttpClient().newCall(request).execute();
-            }
-        }).subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        QrCodeService.submitTransactionStatus(resultRequest, transactionInfo.uuid)
             .subscribe(new Subscriber<Response>() {
                 @Override
                 public void onCompleted() {
@@ -398,7 +379,6 @@ public class PayTokenActivity extends BaseActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                 }
             });
     }

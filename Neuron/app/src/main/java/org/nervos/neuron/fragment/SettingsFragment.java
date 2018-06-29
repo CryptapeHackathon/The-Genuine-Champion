@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import org.nervos.neuron.R;
 import org.nervos.neuron.activity.SimpleWebActivity;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -59,7 +59,7 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), SimpleWebActivity.class);
-                intent.putExtra(SimpleWebActivity.EXTRA_URL, ConstantUtil.SOURCE_CODE_GITHUB_URL);
+                intent.putExtra(SimpleWebActivity.EXTRA_URL, ConstUtil.SOURCE_CODE_GITHUB_URL);
                 startActivity(intent);
             }
         });

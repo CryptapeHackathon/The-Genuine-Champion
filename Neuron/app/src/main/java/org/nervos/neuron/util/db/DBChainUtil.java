@@ -1,14 +1,13 @@
 package org.nervos.neuron.util.db;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.snappydb.DB;
 import com.snappydb.DBFactory;
 import com.snappydb.SnappydbException;
 
 import org.nervos.neuron.item.ChainItem;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.List;
 public class DBChainUtil extends DBUtil {
 
     private static final String DB_CHAIN = "db_chain";
-    public static final int ETHEREUM_ID = ConstantUtil.ETH_CHAIN_ID;
+    public static final int ETHEREUM_ID = ConstUtil.ETH_CHAIN_ID;
     private static final String ETHEREUM_NAME = "以太坊mainnet";
 
 

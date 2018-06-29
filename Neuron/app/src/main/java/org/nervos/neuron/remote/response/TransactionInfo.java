@@ -6,15 +6,10 @@ import android.text.TextUtils;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.web3j.utils.Numeric;
 
-import java.math.BigInteger;
-
 public class TransactionInfo implements Parcelable {
-
-    private static final BigInteger TOKENDecimal = new BigInteger("1000000000000000000");
 
     /**
      * from : 0x627306090abaB3A6e1400e9345bC60c78a8BEf57
@@ -41,30 +36,20 @@ public class TransactionInfo implements Parcelable {
 
     public TransactionInfo(String to, String value) {
         this.to = to;
-        this.value = BigInteger.valueOf((long)(Double.parseDouble(value)*10000))
-                .multiply(TOKENDecimal).divide(BigInteger.valueOf(10000)).toString();
+        this.value = NumberUtil.getWeiFromEth(Double.parseDouble(value)).toString();
     }
 
     public double getValue() {
-        LogUtil.d("value: " + value);
-        if (Numeric.containsHexPrefix(value)) {
-            return Numeric.toBigInt(value).multiply(BigInteger.valueOf(10000))
-                    .divide(TOKENDecimal).doubleValue()/10000.0;
-        } else {
-            return new BigInteger(value).multiply(BigInteger.valueOf(10000))
-                    .divide(TOKENDecimal).doubleValue()/10000.0;
-        }
+        return NumberUtil.getEthFromWeiForDoubleDecimal6(value);
     }
 
     public double getQuota() {
-        return BigInteger.valueOf(quota).multiply(BigInteger.valueOf(10000))
-                .divide(TOKENDecimal).doubleValue()/10000.0;
+        return NumberUtil.getEthFromWeiForDoubleDecimal6(String.valueOf(quota));
     }
 
     public double getGas() {
-        return Numeric.toBigInt(gasLimit).multiply(Numeric.toBigInt(gasPrice))
-                .multiply(BigInteger.valueOf(10000))
-                .divide(TOKENDecimal).doubleValue()/10000.0;
+        return NumberUtil.getEthFromWeiForDoubleDecimal6(
+                Numeric.toBigInt(gasLimit).multiply(Numeric.toBigInt(gasPrice)).toString());
     }
 
     public String getGasLimit() {
