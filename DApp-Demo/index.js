@@ -1,4 +1,4 @@
-const contractAddress = '0x44c0005df0cd86ea556a1c3c944a9383482c338c';
+const contractAddress = '0x528ad19bdda2b248373118b1a051841dc07ae9ef';
 const functionAddress = {
   getNames: "cd838f0f",
   betForTeam: "e2093a69",
@@ -55,7 +55,8 @@ function sendBet() {
       to: contractAddress,
       quota: 100000,
       data: functionAddress.betForTeam + voteFor[betValue],
-      value: "0x2386f26fc10000",
+      // 10.0 ether
+      value: "0x8ac7230489e80000",
     }
   };
 
@@ -93,6 +94,7 @@ function sendTx(txInfo, callback) {
               if (!!callback) {
                 callback(response.data);
               }
+              $('#qrcode').empty();
             case "denied":
             case "faied":
               clearTimer();

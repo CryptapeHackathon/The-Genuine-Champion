@@ -13,12 +13,14 @@ contract WorldCupGaming {
   an unsigned integer to store the vote count
   */
   struct BetInfo {
-    mapping(bytes32 => uint) map;
     bytes32[] list;
+    mapping(bytes32 => uint) map;
   }
 
   mapping(bytes32 => address[]) public betMap;
+  bytes32[] public betList;
   mapping(address => BetInfo) private betInfoMap;
+  // for iterate over `betInfoMap`
   address[] public betInfoList;
 
   bytes32 winnerTeam;
@@ -46,19 +48,34 @@ contract WorldCupGaming {
     return betInfoMap[sender].list;
   }
 
-  function getBets(bytes32 teamName) public view returns (address []) {
+  function getBetList() public view returns (bytes32 []) {
+      return betList;
+  }
+
+  function getBetAddrs(bytes32 teamName) public view returns (address []) {
     return betMap[teamName];
   }
 
+  function getBetValue(address sender, bytes32 teamName) public view returns (uint) {
+      return betInfoMap[sender].map[teamName];
+  }
+
+
   function betForTeam(bytes32 teamName) public payable {
     require(msg.value > 0);
+    require(teamMap[teamName] > 0);
+
+    if (betMap[teamName].length == 0) {
+        betList.push(teamName);
+    }
     if (betInfoMap[msg.sender].list.length == 0) {
       betMap[teamName].push(msg.sender);
       betInfoList.push(msg.sender);
     }
     if (betInfoMap[msg.sender].map[teamName] == 0) {
-      betInfoMap[msg.sender].map[teamName] = 0;
-      betInfoMap[msg.sender].list.push(teamName);
+        betInfoMap[msg.sender] = BetInfo(new bytes32[](0));
+       betInfoMap[msg.sender].map[teamName] = 0;
+       betInfoMap[msg.sender].list.push(teamName);
     }
     betInfoMap[msg.sender].map[teamName] += msg.value;
   }
@@ -71,11 +88,21 @@ contract WorldCupGaming {
 
     winnerTeam = teamName;
 
-    var betAddressList = betMap[teamName];
+    address[] storage betAddressList = betMap[teamName];
     for (uint i = 0; i < betAddressList.length; i++) {
-      var betAddress = betAddressList[i];
-      var betInfo = betInfoMap[betAddress];
-      betAddress.transfer(betInfo.map[teamName] * 2);
+      address betAddress = betAddressList[i];
+      BetInfo storage betInfo = betInfoMap[betAddress];
+      betAddress.transfer(betInfo.map[teamName]);
     }
+
+    // Clear state
+    for (uint j = 0; j < betList.length; j++) {
+      delete betMap[betList[j]];
+    }
+    for (uint k = 0; k < betInfoList.length; k++) {
+      delete betInfoMap[betInfoList[k]];
+    }
+    delete betList;
+    delete betInfoList;
   }
 }
