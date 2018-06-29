@@ -1,7 +1,7 @@
 # The-Genuine-Champion
 The First Cryptape Hackthon project from The Genuine Champion team.
 
-## What we do?
+<!-- ## What we do?
 - Transaction signing should be happending at where the private key is, only. 
 - Offline smartphone wallet is so far the best place to store your private key. (trade off between safety and convenience)
 - DApps are gonna be on multiple platforms - mobile, web, PC
@@ -10,4 +10,4 @@ So here's a conflict point: How can you sign a transaction across the platforms,
 
 Answer is Unisign, an all-in-one inter-platform transaction signing solution.
 
-To be continue...
+To be continue... -->
