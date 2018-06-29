@@ -3,10 +3,10 @@
 export PATH=/Users/leeyr/Documents/cryptape/code/cita-cli/target/debug:$PATH
 
 # compile contacts
-#rm *.bin
-#solcjs voting.sol --bin &> compile.log
+rm *.bin
+solcjs worldCupGaming.sol --bin &> compile.log
 
-contract_bin=0x`cat voting_sol_Voting.bin`
+contract_bin=0x`cat worldCupGaming_sol_worldCupGaming.bin`
 echo "$contract_bin";
 
 # deploy contract
