@@ -18,7 +18,7 @@ public class TokenItem implements Parcelable{
     public String symbol;
     public int decimals;
     public String amount;
-    public int chainId;
+    public long chainId;
     public String chainName;
     public double balance;
 
@@ -78,7 +78,7 @@ public class TokenItem implements Parcelable{
         dest.writeString(this.symbol);
         dest.writeInt(this.decimals);
         dest.writeString(this.amount);
-        dest.writeInt(this.chainId);
+        dest.writeLong(this.chainId);
         dest.writeString(this.chainName);
         dest.writeDouble(this.balance);
     }

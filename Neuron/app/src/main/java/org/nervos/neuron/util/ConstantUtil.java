@@ -39,7 +39,7 @@ public class ConstantUtil {
     public static final BigInteger GAS_PRICE = Numeric.toBigInt("0x4E3B29200");
     public static final String RPC_RESULT_ZERO = "0x";
 
-    public static final String SERVER_URL = "http://118.31.229.67:8000";
+    public static final String SERVER_URL = "http://118.31.229.67:8000/";
 
     public static final String ZERO_16 = "000000000000000000000000";
     public static final String NAME_HASH = "06fdde03";

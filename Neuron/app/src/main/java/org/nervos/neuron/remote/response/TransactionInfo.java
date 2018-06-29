@@ -1,12 +1,18 @@
 package org.nervos.neuron.remote.response;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.google.gson.annotations.SerializedName;
+
+import org.nervos.neuron.util.LogUtil;
+import org.nervos.neuron.util.NumberUtil;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-public class TransactionInfo {
+public class TransactionInfo implements Parcelable {
 
     private static final BigInteger TOKENDecimal = new BigInteger("1000000000000000000");
 
@@ -25,7 +31,8 @@ public class TransactionInfo {
     public long nonce;
     private long quota = -1;
     public String data;
-    private String value;
+    @SerializedName("value")
+    public String value;
     public long chainId;
     public int version;
     private String gasLimit;
@@ -39,8 +46,14 @@ public class TransactionInfo {
     }
 
     public double getValue() {
-        return new BigInteger(value).multiply(BigInteger.valueOf(10000))
-                .divide(TOKENDecimal).doubleValue()/10000.0;
+        LogUtil.d("value: " + value);
+        if (Numeric.containsHexPrefix(value)) {
+            return Numeric.toBigInt(value).multiply(BigInteger.valueOf(10000))
+                    .divide(TOKENDecimal).doubleValue()/10000.0;
+        } else {
+            return new BigInteger(value).multiply(BigInteger.valueOf(10000))
+                    .divide(TOKENDecimal).doubleValue()/10000.0;
+        }
     }
 
     public double getQuota() {
@@ -77,4 +90,51 @@ public class TransactionInfo {
     public boolean isEthereum() {
         return !TextUtils.isEmpty(gasLimit);
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.from);
+        dest.writeString(this.to);
+        dest.writeLong(this.nonce);
+        dest.writeLong(this.quota);
+        dest.writeString(this.data);
+        dest.writeString(this.value);
+        dest.writeLong(this.chainId);
+        dest.writeInt(this.version);
+        dest.writeString(this.gasLimit);
+        dest.writeString(this.gasPrice);
+        dest.writeString(this.uuid);
+    }
+
+    protected TransactionInfo(Parcel in) {
+        this.from = in.readString();
+        this.to = in.readString();
+        this.nonce = in.readLong();
+        this.quota = in.readLong();
+        this.data = in.readString();
+        this.value = in.readString();
+        this.chainId = in.readLong();
+        this.version = in.readInt();
+        this.gasLimit = in.readString();
+        this.gasPrice = in.readString();
+        this.uuid = in.readString();
+    }
+
+    public static final Creator<TransactionInfo> CREATOR = new Creator<TransactionInfo>() {
+        @Override
+        public TransactionInfo createFromParcel(Parcel source) {
+            return new TransactionInfo(source);
+        }
+
+        @Override
+        public TransactionInfo[] newArray(int size) {
+            return new TransactionInfo[size];
+        }
+    };
 }

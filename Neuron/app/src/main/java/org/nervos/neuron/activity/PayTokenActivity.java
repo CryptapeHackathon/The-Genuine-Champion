@@ -15,11 +15,12 @@ import com.google.gson.Gson;
 import org.nervos.neuron.R;
 import org.nervos.neuron.dialog.SimpleDialog;
 import org.nervos.neuron.item.ChainItem;
-import org.nervos.neuron.remote.QRCodeService;
+import org.nervos.neuron.remote.request.TransactionResult;
 import org.nervos.neuron.remote.request.TransactionResultRequest;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.item.WalletItem;
-import org.nervos.neuron.remote.response.TransactionStatusResponse;
+import org.nervos.neuron.remote.response.TransactionInfoResponse;
+import org.nervos.neuron.service.NervosHttpService;
 import org.nervos.neuron.service.NervosRpcService;
 import org.nervos.neuron.service.EthRpcService;
 import org.nervos.neuron.util.Blockies;
@@ -32,12 +33,17 @@ import org.nervos.neuron.util.db.DBWalletUtil;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.concurrent.Callable;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -248,7 +254,8 @@ public class PayTokenActivity extends BaseActivity {
                             gotoSignSuccess(ethSendTransaction.getTransactionHash());
                         } else {
                             resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
-                            resultRequest.transaction.hash = ethSendTransaction.getTransactionHash();
+                            resultRequest.transaction = new TransactionResult
+                                    (ethSendTransaction.getTransactionHash());
                             submitPayStatus();
                         }
                     } else if (ethSendTransaction.getError() != null &&
@@ -279,7 +286,7 @@ public class PayTokenActivity extends BaseActivity {
     }
 
     private void transferNervos(String password, ProgressBar progressBar) {
-        NervosRpcService.transferNervos(transactionInfo.to, transactionInfo.getValue(), password)
+        NervosRpcService.transferNervos(transactionInfo.to, transactionInfo.getValue(), transactionInfo.data, password)
             .subscribe(new Subscriber<org.nervos.web3j.protocol.core.methods.response.EthSendTransaction>() {
                 @Override
                 public void onCompleted() {
@@ -309,7 +316,8 @@ public class PayTokenActivity extends BaseActivity {
                             gotoSignSuccess(ethSendTransaction.getSendTransactionResult().getHash());
                         } else {
                             resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
-                            resultRequest.transaction.hash = ethSendTransaction.getSendTransactionResult().getHash();
+                            resultRequest.transaction = new TransactionResult
+                                    (ethSendTransaction.getSendTransactionResult().getHash());
                             submitPayStatus();
                         }
                     } else if (ethSendTransaction.getError() != null &&
@@ -357,27 +365,39 @@ public class PayTokenActivity extends BaseActivity {
 
     private void submitPayStatus() {
         showProgressCircle();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantUtil.SERVER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody requestBody = RequestBody.create(mediaType, new Gson().toJson(resultRequest));
+        Request request = new Request.Builder()
+                .put(requestBody)
+                .url(ConstantUtil.SERVER_URL + "tx/status/" + transactionInfo.uuid)
                 .build();
-        QRCodeService qrCodeService = retrofit.create(QRCodeService.class);
-        qrCodeService.submitTransactionStatus(transactionInfo.uuid, resultRequest)
-            .subscribeOn(Schedulers.io())
+        Observable.fromCallable(new Callable<Response>() {
+            @Override
+            public Response call() throws IOException {
+                return NervosHttpService.getHttpClient().newCall(request).execute();
+            }
+        }).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Subscriber<Response<TransactionStatusResponse>>() {
+            .subscribe(new Subscriber<Response>() {
                 @Override
                 public void onCompleted() {
                     dismissProgressCircle();
-                    finish();
                 }
                 @Override
                 public void onError(Throwable e) {
                     e.printStackTrace();
-                    dismissProgressBar();
+                    dismissProgressCircle();
+                    finish();
                 }
                 @Override
-                public void onNext(Response<TransactionStatusResponse> response) {
+                public void onNext(Response response) {
+                    try {
+                        String result = response.body().string();
+                        LogUtil.d("response: " + result);
+                        finish();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                 }
             });

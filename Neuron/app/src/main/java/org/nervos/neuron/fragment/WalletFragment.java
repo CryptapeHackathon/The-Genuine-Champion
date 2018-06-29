@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,11 +25,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.nervos.neuron.R;
 import org.nervos.neuron.activity.AddWalletActivity;
-import org.nervos.neuron.activity.AppWebActivity;
 import org.nervos.neuron.activity.PayTokenActivity;
 import org.nervos.neuron.activity.QrCodeActivity;
 import org.nervos.neuron.activity.ReceiveQrCodeActivity;
-import org.nervos.neuron.activity.TokenManageActivity;
 import org.nervos.neuron.activity.TransferActivity;
 import org.nervos.neuron.activity.WalletManageActivity;
 import org.nervos.neuron.custom.TitleBar;
@@ -40,20 +37,18 @@ import org.nervos.neuron.event.TokenRefreshEvent;
 import org.nervos.neuron.item.ChainItem;
 import org.nervos.neuron.item.TokenItem;
 import org.nervos.neuron.item.WalletItem;
-import org.nervos.neuron.remote.QRCodeService;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.remote.response.TransactionInfoResponse;
-import org.nervos.neuron.service.EthRpcService;
-import org.nervos.neuron.service.NervosRpcService;
+import org.nervos.neuron.service.NervosHttpService;
 import org.nervos.neuron.service.WalletService;
 import org.nervos.neuron.util.Blockies;
 import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 import org.nervos.neuron.util.db.SharePrefUtil;
 import org.nervos.neuron.util.permission.PermissionUtil;
 import org.nervos.neuron.util.permission.RuntimeRationale;
-import org.nervos.neuron.util.web.WebAppUtil;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.gson.Gson;
@@ -62,16 +57,14 @@ import com.uuzuche.lib_zxing.activity.CodeUtils;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
 
 public class WalletFragment extends BaseFragment {
 
@@ -91,7 +84,6 @@ public class WalletFragment extends BaseFragment {
     private List<TokenItem> tokenItemList = new ArrayList<>();
     private List<String> walletNameList = new ArrayList<>();
     private WalletItem walletItem;
-    private Retrofit retrofit;
     private TransactionInfo transactionInfo;
 
 
@@ -115,19 +107,12 @@ public class WalletFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
         initWalletData(true);
-        initRetrofit();
         initAdapter();
         initListener();
         initTitleBarListener();
         initRefresh();
     }
 
-    private void initRetrofit() {
-        retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantUtil.SERVER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-    }
 
     private void initWalletData(boolean showProgress) {
         if ((walletItem = DBWalletUtil.getCurrentWallet(getContext())) != null) {
@@ -196,30 +181,25 @@ public class WalletFragment extends BaseFragment {
             startPayTokenPage(transactionInfo);
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
-            showProgressCircle();
-            QRCodeService qrCodeService = retrofit.create(QRCodeService.class);
-            qrCodeService.getTransactionInfo(value)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Response<TransactionInfoResponse>>() {
-                    @Override
-                    public void onCompleted() {
-                        dismissProgressBar();
+            Request request = new Request.Builder().url(value).build();
+            Call call = NervosHttpService.getHttpClient().newCall(request);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+                @Override
+                public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                    String result = response.body().string();
+                    if (result != null) {
+                        TransactionInfoResponse infoResponse = new Gson().fromJson(result,
+                                TransactionInfoResponse.class);
+                        transactionInfo = infoResponse.transaction;
+                        transactionInfo.uuid = infoResponse.uuid;
+                        startPayTokenPage(transactionInfo);
                     }
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                        dismissProgressBar();
-                    }
-                    @Override
-                    public void onNext(Response<TransactionInfoResponse> response) {
-                        if (response != null && response.body() != null) {
-                            transactionInfo = response.body().transaction;
-                            transactionInfo.uuid = value;
-                            startPayTokenPage(transactionInfo);
-                        }
-                    }
-                });
+                }
+            });
         }
     }
 

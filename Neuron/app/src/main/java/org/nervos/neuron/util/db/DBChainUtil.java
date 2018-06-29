@@ -37,7 +37,7 @@ public class DBChainUtil extends DBUtil {
         return chainItemList;
     }
 
-    public static ChainItem getChain(Context context, int chainId) {
+    public static ChainItem getChain(Context context, long chainId) {
         try {
             DB db = DBFactory.open(context, DB_CHAIN);
             ChainItem chainItem = db.getObject(getDbKey(String.valueOf(chainId)), ChainItem.class);

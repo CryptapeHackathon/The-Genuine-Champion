@@ -157,7 +157,8 @@ public class NervosRpcService {
 
     }
 
-    public static Observable<EthSendTransaction> transferNervos(String toAddress, double value, String password) {
+    public static Observable<EthSendTransaction> transferNervos(String toAddress, double value,
+                                                                String data, String password) {
         BigInteger transferValue = ConstantUtil.NervosDecimal
                 .multiply(BigInteger.valueOf((long)(10000*value))).divide(BigInteger.valueOf(10000));
         LogUtil.d("transfer value: " + transferValue.toString());
@@ -170,7 +171,7 @@ public class NervosRpcService {
             @Override
             public Observable<EthSendTransaction> call(BigInteger validUntilBlock) {
                 Transaction transaction = Transaction.createFunctionCallTransaction(toAddress, randomNonce(), quota.longValue(),
-                        validUntilBlock.longValue(), version, chainId, transferValue, "");
+                        validUntilBlock.longValue(), version, chainId, transferValue, data);
                 try {
                     String privateKey = AESCrypt.decrypt(password, walletItem.cryptPrivateKey);
                     String rawTx = transaction.sign(privateKey);

@@ -6,8 +6,4 @@ public class TransactionResultRequest {
     public String error;
     public TransactionResult transaction;
 
-    public class TransactionResult {
-        public String hash;
-    }
-
 }
