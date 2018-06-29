@@ -89,5 +89,16 @@ def get_tx_status(uuid):
     return redis_value or not_found(uuid)
 
 
+@app.after_request
+def after_request(resp):
+    for header in [
+            'Access-Control-Allow-Origin',
+            'Access-Control-Allow-Headers',
+            'Access-Control-Allow-Methods',
+    ]:
+        resp.headers[header] = '*'
+    return resp
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
