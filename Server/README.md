@@ -14,7 +14,7 @@
     // POST /tx/info/
     // [Request]
     {
-      // [必填] 链的类型，可选值: "ethereum", "bitcoin", "cita", "ckb"
+      // [必填] 链的类型，可选值: "ethereum", "cita"
       "chain": String,
       // [可选] 过期时间, 单位(秒), 不能超过 1 小时(3600秒)，默认值是 1 小时 
       "expire": Int,
@@ -29,6 +29,8 @@
     {
       // 交易信息的 ID (一个 uuid 值)
       "uuid": String,
+      // 过期时间(秒)
+      "expire": Int,
     }
     // [Response.400] 参数有误
     {

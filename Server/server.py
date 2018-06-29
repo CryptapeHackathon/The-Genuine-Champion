@@ -71,7 +71,7 @@ def update_tx_status(uuid):
         if not error:
             return bad_request(uuid, 'Error message is required!')
     else:
-        return bad_request('Invalid status')
+        return bad_request(uuid, 'Invalid status')
 
     redis_data['status'] = status
     redis_data['error'] = error
