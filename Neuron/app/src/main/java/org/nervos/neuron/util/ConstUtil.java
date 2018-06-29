@@ -5,12 +5,17 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-public class ConstantUtil {
+public class ConstUtil {
 
     public static final String ETH = "ETH";
     public static final String NOS = "NOS";
 
-    public static final BigInteger ETHDecimal = new BigInteger("1000000000000000000");
+    public static final BigInteger DECIMAL_POW_18 = BigInteger.TEN.pow(18);
+    public static final BigInteger ETHDecimal = DECIMAL_POW_18;
+    public static final BigInteger NervosDecimal = DECIMAL_POW_18;
+    public static final long LONG_6 = 1000000;
+    public static final double DOUBLE_6 = 1000000.0;
+
     public static final String ETH_MAIN_NET = "Ethereum Mainnet";
     public static final int ETH_CHAIN_ID = -1;
     public static final String SOURCE_CODE_GITHUB_URL = "https://github.com/cryptape/Neuron-Android";
@@ -26,10 +31,9 @@ public class ConstantUtil {
     public static final String DISCOVER_URL = "http://47.97.171.140:8866/dapps";
     public static final String INNER_URL = "http://47.97.171.140:8866/";
 
-    public static final BigInteger NervosDecimal = new BigInteger("100000000000000000");
     public static final String NERVOS_CHAIN_NAME = "Nervos Chain";
     public static final long DEFAULT_NERVOS_DEFAULT_CHAIN_ID = 1;
-    public static final long DEFAULT_QUATO = 1000000;
+    public static final long DEFAULT_QUATO = LONG_6;
     public static final String NERVOS_NODE_IP = "http://47.94.105.230:1337";
 //    public static final String ETH_NODE_IP = "https://mainnet.infura.io/h3iIzGIN6msu3KeUrdlt";
     public static final String ETH_NODE_IP = "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk";
@@ -39,7 +43,8 @@ public class ConstantUtil {
     public static final BigInteger GAS_PRICE = Numeric.toBigInt("0x4E3B29200");
     public static final String RPC_RESULT_ZERO = "0x";
 
-    public static final String SERVER_URL = "http://118.31.229.67:8000";
+    public static final String SERVER_URL = "http://118.31.229.67:8000/";
+    public static final String SERVER_SUBMIT_STATUS_URL = SERVER_URL + "tx/status/%s";
 
     public static final String ZERO_16 = "000000000000000000000000";
     public static final String NAME_HASH = "06fdde03";
