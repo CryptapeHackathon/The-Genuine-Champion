@@ -1,4 +1,4 @@
-const contractAddress = '0x528ad19bdda2b248373118b1a051841dc07ae9ef';
+const contractAddress = '0xb0770fdef4ea010b952181b54c1cd7d4ade3eaaa';
 const functionAddress = {
   getNames: "cd838f0f",
   betForTeam: "e2093a69",
