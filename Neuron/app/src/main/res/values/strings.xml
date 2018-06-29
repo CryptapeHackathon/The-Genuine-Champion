@@ -162,4 +162,5 @@
     <string name="set_value">设置金额</string>
     <string name="amount">金额</string>
     <string name="token_category">币种</string>
+    <string name="qr_code_error">二维码错误</string>
 </resources>

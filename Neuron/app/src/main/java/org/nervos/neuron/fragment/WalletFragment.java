@@ -43,7 +43,6 @@ import org.nervos.neuron.service.NervosHttpService;
 import org.nervos.neuron.service.WalletService;
 import org.nervos.neuron.util.Blockies;
 import org.nervos.neuron.util.ConstantUtil;
-import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 import org.nervos.neuron.util.db.SharePrefUtil;
@@ -60,11 +59,15 @@ import com.yanzhenjie.permission.Permission;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
+import okhttp3.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class WalletFragment extends BaseFragment {
 
@@ -175,31 +178,60 @@ public class WalletFragment extends BaseFragment {
         });
     }
 
+
     private void handlePayQrCode(String value) {
         try {
             transactionInfo = new Gson().fromJson(value, TransactionInfo.class);
             startPayTokenPage(transactionInfo);
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
+            showProgressCircle();
             Request request = new Request.Builder().url(value).build();
-            Call call = NervosHttpService.getHttpClient().newCall(request);
-            call.enqueue(new Callback() {
+            Observable.fromCallable(new Callable<Response>() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
+                public Response call() throws IOException {
+                    return NervosHttpService.getHttpClient().newCall(request).execute();
                 }
-                @Override
-                public void onResponse(Call call, okhttp3.Response response) throws IOException {
-                    String result = response.body().string();
-                    if (result != null) {
-                        TransactionInfoResponse infoResponse = new Gson().fromJson(result,
-                                TransactionInfoResponse.class);
-                        transactionInfo = infoResponse.transaction;
-                        transactionInfo.uuid = infoResponse.uuid;
-                        startPayTokenPage(transactionInfo);
+            }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Response>() {
+                    @Override
+                    public void onCompleted() {
+                        dismissProgressCircle();
                     }
-                }
-            });
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        dismissProgressCircle();
+                        Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onNext(Response response) {
+                        try {
+                            String result = response.body().string();
+                            if (TextUtils.isEmpty(result)) {
+                                Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            TransactionInfoResponse infoResponse = new Gson().fromJson(result,
+                                    TransactionInfoResponse.class);
+                            if (infoResponse == null) {
+                                Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            if (!TextUtils.isEmpty(infoResponse.error)) {
+                                Toast.makeText(getContext(), infoResponse.error, Toast.LENGTH_SHORT).show();
+                            } else if (infoResponse.transaction != null) {
+                                transactionInfo = infoResponse.transaction;
+                                transactionInfo.uuid = infoResponse.uuid;
+                                startPayTokenPage(transactionInfo);
+                            }
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                            Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
         }
     }
 

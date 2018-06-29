@@ -13,4 +13,6 @@ public class TransactionInfoResponse {
     @SerializedName("transaction")
     public TransactionInfo transaction;
 
+    public String error;
+
 }

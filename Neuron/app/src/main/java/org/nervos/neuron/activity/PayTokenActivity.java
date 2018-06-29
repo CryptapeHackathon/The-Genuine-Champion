@@ -369,7 +369,7 @@ public class PayTokenActivity extends BaseActivity {
         RequestBody requestBody = RequestBody.create(mediaType, new Gson().toJson(resultRequest));
         Request request = new Request.Builder()
                 .put(requestBody)
-                .url(ConstantUtil.SERVER_URL + "tx/status/" + transactionInfo.uuid)
+                .url(String.format(ConstantUtil.SERVER_SUBMIT_STATUS_URL, transactionInfo.uuid))
                 .build();
         Observable.fromCallable(new Callable<Response>() {
             @Override
