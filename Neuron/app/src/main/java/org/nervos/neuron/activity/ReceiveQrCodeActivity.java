@@ -18,7 +18,11 @@ import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.nervos.neuron.R;
 import org.nervos.neuron.item.WalletItem;
+import org.nervos.neuron.remote.QRCodeService;
+import org.nervos.neuron.remote.request.TransactionInfoRequest;
+import org.nervos.neuron.remote.request.TransactionResultRequest;
 import org.nervos.neuron.remote.response.TransactionInfo;
+import org.nervos.neuron.remote.response.TransactionStatusResponse;
 import org.nervos.neuron.service.EthRpcService;
 import org.nervos.neuron.util.Blockies;
 import org.nervos.neuron.util.ConstantUtil;
@@ -27,8 +31,13 @@ import org.nervos.neuron.util.db.DBWalletUtil;
 import java.math.BigInteger;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class ReceiveQrCodeActivity extends BaseActivity {
@@ -38,6 +47,7 @@ public class ReceiveQrCodeActivity extends BaseActivity {
     private ImageView qrCodeImage;
     private WalletItem walletItem;
     private TextView amountText;
+    private TransactionInfo transactionInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,6 +92,30 @@ public class ReceiveQrCodeActivity extends BaseActivity {
         qrCodeImage.setImageBitmap(bitmap);
     }
 
+    private void handleEthTransaction() {
+        transactionInfo.setGasLimit(ConstantUtil.GAS_LIMIT.toString());
+        showProgressCircle();
+        EthRpcService.getEthGasPrice()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Subscriber<BigInteger>() {
+                @Override
+                public void onCompleted() {
+                    dismissProgressCircle();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    e.printStackTrace();
+                    dismissProgressBar();
+                }
+                @Override
+                public void onNext(BigInteger gasPrice) {
+                    transactionInfo.setGasPrice(gasPrice.toString());
+                    setQrCodeImage(new Gson().toJson(transactionInfo));
+                }
+            });
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -90,33 +124,13 @@ public class ReceiveQrCodeActivity extends BaseActivity {
             String value = data.getStringExtra(SetAmountActivity.EXTRA_VALUE);
             String category = data.getStringExtra(SetAmountActivity.EXTRA_CATEGORY);
             amountText.setText(String.format("%s %s", value, category));
-            TransactionInfo transactionInfo = new TransactionInfo(walletItem.address, value);
+            transactionInfo = new TransactionInfo(walletItem.address, value);
             if (ConstantUtil.ETH.equalsIgnoreCase(category)) {
-                transactionInfo.setGasLimit(ConstantUtil.GAS_LIMIT.toString());
-                showProgressCircle();
-                EthRpcService.getEthGasPrice()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<BigInteger>() {
-                        @Override
-                        public void onCompleted() {
-                            dismissProgressCircle();
-                        }
-                        @Override
-                        public void onError(Throwable e) {
-                            e.printStackTrace();
-                            dismissProgressCircle();
-                        }
-                        @Override
-                        public void onNext(BigInteger gasPrice) {
-                            transactionInfo.setGasPrice(gasPrice.toString());
-                            setQrCodeImage(new Gson().toJson(transactionInfo));
-                        }
-                    });
+                handleEthTransaction();
             } else {
                 transactionInfo.setQuota(ConstantUtil.DEFAULT_QUATO);
+                setQrCodeImage(new Gson().toJson(transactionInfo));
             }
-
         }
     }
 }

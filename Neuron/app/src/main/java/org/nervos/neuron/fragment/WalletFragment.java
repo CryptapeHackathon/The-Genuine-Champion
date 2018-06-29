@@ -124,7 +124,7 @@ public class WalletFragment extends BaseFragment {
 
     private void initRetrofit() {
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.douban.com/v2/")
+                .baseUrl(ConstantUtil.SERVER_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
@@ -190,7 +190,7 @@ public class WalletFragment extends BaseFragment {
         });
     }
 
-    private void handleQrCode(String value) {
+    private void handlePayQrCode(String value) {
         try {
             transactionInfo = new Gson().fromJson(value, TransactionInfo.class);
             startPayTokenPage(transactionInfo);
@@ -215,6 +215,7 @@ public class WalletFragment extends BaseFragment {
                     public void onNext(Response<TransactionInfoResponse> response) {
                         if (response != null && response.body() != null) {
                             transactionInfo = response.body().transaction;
+                            transactionInfo.uuid = value;
                             startPayTokenPage(transactionInfo);
                         }
                     }
@@ -228,7 +229,7 @@ public class WalletFragment extends BaseFragment {
             chainItem = new ChainItem(ConstantUtil.ETH_CHAIN_ID,
                     ConstantUtil.ETH_MAIN_NET, ConstantUtil.ETH_NODE_IP);
         } else {
-            chainItem = new ChainItem(1,
+            chainItem = new ChainItem(ConstantUtil.DEFAULT_NERVOS_DEFAULT_CHAIN_ID,
                     ConstantUtil.NERVOS_CHAIN_NAME, ConstantUtil.NERVOS_NODE_IP);
         }
         Intent intent = new Intent(getActivity(), PayTokenActivity.class);
@@ -381,7 +382,7 @@ public class WalletFragment extends BaseFragment {
             if (data != null && data.getExtras() != null) {
                 Bundle bundle = data.getExtras();
                 if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
-                    handleQrCode(bundle.getString(CodeUtils.RESULT_STRING));
+                    handlePayQrCode(bundle.getString(CodeUtils.RESULT_STRING));
                 } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
                     Toast.makeText(getContext(), R.string.qrcode_handle_fail, Toast.LENGTH_LONG).show();
                 }

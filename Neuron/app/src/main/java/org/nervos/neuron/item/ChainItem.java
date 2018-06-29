@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ChainItem implements Parcelable{
 
-    public int chainId = ConstantUtil.ETH_CHAIN_ID;
+    public long chainId = ConstantUtil.ETH_CHAIN_ID;
     public String httpProvider;
     public String blockViewer;
     public String name;
@@ -35,7 +35,7 @@ public class ChainItem implements Parcelable{
 
     }
 
-    public ChainItem(int chainId, String name, String httpProvider) {
+    public ChainItem(long chainId, String name, String httpProvider) {
         this.chainId = chainId;
         this.name = name;
         this.httpProvider = httpProvider;
@@ -49,7 +49,7 @@ public class ChainItem implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.chainId);
+        dest.writeLong(this.chainId);
         dest.writeString(this.httpProvider);
         dest.writeString(this.blockViewer);
         dest.writeString(this.name);
@@ -62,7 +62,7 @@ public class ChainItem implements Parcelable{
     }
 
     protected ChainItem(Parcel in) {
-        this.chainId = in.readInt();
+        this.chainId = in.readLong();
         this.httpProvider = in.readString();
         this.blockViewer = in.readString();
         this.name = in.readString();
