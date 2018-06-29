@@ -24,18 +24,56 @@ function init() {
     const sendResultButton = document.getElementById('send_result')
     sendResultButton.addEventListener('click', sendResult)
 
+    // hide set blocks
     document.getElementById('set_div').style.display = 'none'
 
 }
 
 function sendBet() {
-    var betValue=$('input[name=team_bet]:checked').val()
-    var jq = window.jQuery;
+    var betValue = $('input[name=team_bet]:checked').val()
 
     console.log(betValue);
-    document.getElementById('bet_div').style.display = 'none'
-    document.getElementById('set_div').style.display = 'block'
-    $('#qrcode').qrcode(betValue);
+
+    // disable button and change text
+    $('#send_bet').prop('disabled', true);
+    $('#send_bet').html('请扫码并确认交易');
+
+    // plot qr code
+    $('#qrcode').qrcode({
+        size: 150,
+        text: betValue
+    });
+
+}
+
+function qrScanCallBack(status) {
+    //delay time
+    var delayInMilliseconds = 1500;
+
+    switch (status) {
+
+        // if user rejected
+        case 0:
+            $('#send_bet').prop('disabled', true);
+            $('#send_bet').html('用户拒绝交易！');
+            setTimeout(function () {
+                $('#send_bet').prop('disabled', false);
+                $('#send_bet').html('下注！');
+            }, delayInMilliseconds);
+            break;
+
+            //if user accepted
+        case 1:
+            // change to loading status
+            $('#send_bet').prop('disabled', true);
+            $('#send_bet').html('交易发送成功！');
+            setTimeout(function () {
+                // hide bet blocks and show set blocks
+                document.getElementById('bet_div').style.display = 'none'
+                document.getElementById('set_div').style.display = 'block'
+            }, delayInMilliseconds);
+            break;
+    }
 }
 
 //construct AppChain transaction structure
