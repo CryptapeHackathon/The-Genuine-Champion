@@ -15,8 +15,11 @@ import com.google.gson.Gson;
 import org.nervos.neuron.R;
 import org.nervos.neuron.dialog.SimpleDialog;
 import org.nervos.neuron.item.ChainItem;
+import org.nervos.neuron.remote.QRCodeService;
+import org.nervos.neuron.remote.request.TransactionResultRequest;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.item.WalletItem;
+import org.nervos.neuron.remote.response.TransactionStatusResponse;
 import org.nervos.neuron.service.NervosRpcService;
 import org.nervos.neuron.service.EthRpcService;
 import org.nervos.neuron.util.Blockies;
@@ -32,6 +35,9 @@ import org.web3j.utils.Numeric;
 import java.math.BigInteger;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -47,6 +53,7 @@ public class PayTokenActivity extends BaseActivity {
     private WalletItem walletItem;
     private BottomSheetDialog sheetDialog;
     private ChainItem chainItem;
+    private TransactionResultRequest resultRequest = new TransactionResultRequest();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,6 +137,9 @@ public class PayTokenActivity extends BaseActivity {
         findViewById(R.id.pay_reject).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                resultRequest.status = ConstantUtil.TRANSACTION_DENIED;
+                submitPayStatus();
+
                 setResult(AppWebActivity.RESULT_CODE_CANCEL);
                 finish();
             }
@@ -219,23 +229,50 @@ public class PayTokenActivity extends BaseActivity {
                     e.printStackTrace();
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(mActivity, R.string.transfer_fail, Toast.LENGTH_SHORT).show();
-                    gotoSignFail(e.getMessage());
+
+                    if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                        gotoSignFail(e.getMessage());
+                    } else {
+                        resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                        resultRequest.error = e.getMessage();
+                        submitPayStatus();
+                    }
                 }
                 @Override
                 public void onNext(EthSendTransaction ethSendTransaction) {
                     if (!TextUtils.isEmpty(ethSendTransaction.getTransactionHash())) {
                         sheetDialog.dismiss();
                         Toast.makeText(mActivity, R.string.transfer_success, Toast.LENGTH_SHORT).show();
-                        gotoSignSuccess(ethSendTransaction.getTransactionHash());
+
+                        if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                            gotoSignSuccess(ethSendTransaction.getTransactionHash());
+                        } else {
+                            resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
+                            resultRequest.transaction.hash = ethSendTransaction.getTransactionHash();
+                            submitPayStatus();
+                        }
                     } else if (ethSendTransaction.getError() != null &&
                             !TextUtils.isEmpty(ethSendTransaction.getError().getMessage())){
                         sheetDialog.dismiss();
                         Toast.makeText(mActivity, ethSendTransaction.getError().getMessage(),
                                 Toast.LENGTH_SHORT).show();
-                        gotoSignFail(ethSendTransaction.getError().getMessage());
+                        if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                            gotoSignFail(ethSendTransaction.getError().getMessage());
+                        } else {
+                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.error = ethSendTransaction.getError().getMessage();
+                            submitPayStatus();
+                        }
                     } else {
                         Toast.makeText(mActivity, R.string.transfer_fail, Toast.LENGTH_SHORT).show();
-                        gotoSignFail(getString(R.string.transfer_fail));
+
+                        if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                            gotoSignFail(getString(R.string.transfer_fail));
+                        } else {
+                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.error = getString(R.string.transfer_fail);
+                            submitPayStatus();
+                        }
                     }
                 }
             });
@@ -252,7 +289,14 @@ public class PayTokenActivity extends BaseActivity {
                 public void onError(Throwable e) {
                     e.printStackTrace();
                     progressBar.setVisibility(View.GONE);
-                    gotoSignFail(e.getMessage());
+
+                    if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                        gotoSignFail(e.getMessage());
+                    } else {
+                        resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                        resultRequest.error = e.getMessage();
+                        submitPayStatus();
+                    }
                 }
                 @Override
                 public void onNext(org.nervos.web3j.protocol.core.methods.response.EthSendTransaction ethSendTransaction) {
@@ -260,16 +304,37 @@ public class PayTokenActivity extends BaseActivity {
                         sheetDialog.dismiss();
                         DBChainUtil.saveChain(mActivity, chainItem);
                         Toast.makeText(mActivity, R.string.transfer_success, Toast.LENGTH_SHORT).show();
-                        gotoSignSuccess(ethSendTransaction.getSendTransactionResult().getHash());
+
+                        if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                            gotoSignSuccess(ethSendTransaction.getSendTransactionResult().getHash());
+                        } else {
+                            resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
+                            resultRequest.transaction.hash = ethSendTransaction.getSendTransactionResult().getHash();
+                            submitPayStatus();
+                        }
                     } else if (ethSendTransaction.getError() != null &&
                             !TextUtils.isEmpty(ethSendTransaction.getError().getMessage())){
                         sheetDialog.dismiss();
                         Toast.makeText(mActivity, ethSendTransaction.getError().getMessage(),
                                 Toast.LENGTH_SHORT).show();
-                        gotoSignFail(ethSendTransaction.getError().getMessage());
+
+                        if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                            gotoSignFail(ethSendTransaction.getError().getMessage());
+                        } else {
+                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.error = ethSendTransaction.getError().getMessage();
+                            submitPayStatus();
+                        }
                     } else {
                         Toast.makeText(mActivity, R.string.transfer_fail, Toast.LENGTH_SHORT).show();
-                        gotoSignFail(getString(R.string.transfer_fail));
+
+                        if (TextUtils.isEmpty(transactionInfo.uuid)) {
+                            gotoSignFail(getString(R.string.transfer_fail));
+                        } else {
+                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.error = getString(R.string.transfer_fail);
+                            submitPayStatus();
+                        }
                     }
                 }
             });
@@ -277,7 +342,6 @@ public class PayTokenActivity extends BaseActivity {
 
 
     private void gotoSignSuccess(String hexHash) {
-        LogUtil.d("hexHash: " + hexHash);
         Intent intent = new Intent();
         intent.putExtra(EXTRA_HEX_HASH, hexHash);
         setResult(AppWebActivity.RESULT_CODE_SUCCESS, intent);
@@ -289,6 +353,34 @@ public class PayTokenActivity extends BaseActivity {
         intent.putExtra(EXTRA_PAY_ERROR, error);
         setResult(AppWebActivity.RESULT_CODE_FAIL, intent);
         finish();
+    }
+
+    private void submitPayStatus() {
+        showProgressCircle();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(ConstantUtil.SERVER_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        QRCodeService qrCodeService = retrofit.create(QRCodeService.class);
+        qrCodeService.submitTransactionStatus(transactionInfo.uuid, resultRequest)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Subscriber<Response<TransactionStatusResponse>>() {
+                @Override
+                public void onCompleted() {
+                    dismissProgressCircle();
+                    finish();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    e.printStackTrace();
+                    dismissProgressBar();
+                }
+                @Override
+                public void onNext(Response<TransactionStatusResponse> response) {
+
+                }
+            });
     }
 
 }

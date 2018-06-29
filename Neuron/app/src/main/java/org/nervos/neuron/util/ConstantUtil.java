@@ -28,6 +28,7 @@ public class ConstantUtil {
 
     public static final BigInteger NervosDecimal = new BigInteger("100000000000000000");
     public static final String NERVOS_CHAIN_NAME = "Nervos Chain";
+    public static final long DEFAULT_NERVOS_DEFAULT_CHAIN_ID = 1;
     public static final long DEFAULT_QUATO = 1000000;
     public static final String NERVOS_NODE_IP = "http://47.94.105.230:1337";
 //    public static final String ETH_NODE_IP = "https://mainnet.infura.io/h3iIzGIN6msu3KeUrdlt";
@@ -37,6 +38,8 @@ public class ConstantUtil {
     public static final BigInteger GAS_LIMIT = Numeric.toBigInt("0x23280");
     public static final BigInteger GAS_PRICE = Numeric.toBigInt("0x4E3B29200");
     public static final String RPC_RESULT_ZERO = "0x";
+
+    public static final String SERVER_URL = "http://118.31.229.67:8000";
 
     public static final String ZERO_16 = "000000000000000000000000";
     public static final String NAME_HASH = "06fdde03";
@@ -51,6 +54,14 @@ public class ConstantUtil {
 
     public static final String EXTRA_PAYLOAD = "extra_payload";
     public static final String EXTRA_CHAIN = "extra_chain";
+
+
+    public static final String CHAIN_ETHEREUM = "ethereum";
+    public static final String CHAIN_CITA = "cita";
+
+    public static final String TRANSACTION_SUCCESS = "success";
+    public static final String TRANSACTION_DENIED = "denied";
+    public static final String TRANSACTION_FAILED = "failed";
 
 
 

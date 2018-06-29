@@ -30,6 +30,7 @@ public class TransactionInfo {
     public int version;
     private String gasLimit;
     private String gasPrice;
+    public String uuid;
 
     public TransactionInfo(String to, String value) {
         this.to = to;
