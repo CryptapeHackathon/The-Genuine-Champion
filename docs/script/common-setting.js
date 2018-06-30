@@ -17,7 +17,6 @@ var common = {
     // the default 
     alias: {
         '/_sidebar.md': `/${default_language}/_sidebar.md`,
-        '/_navbar.md': `/${default_language}/_navbar.md`,
     },
 
     // configuration for searching plugin
@@ -29,15 +28,13 @@ var common = {
 
         // localization
         placeholder: {
-            '/zh-CN/': '搜索',
-            '/': 'Type to search',
+            '/': '搜索',
         },
 
 
         // localization
         noData: {
-            '/zh-CN/': '找不到结果',
-            '/': 'No Results',
+            '/': '找不到结果',
         },
 
         // depth of the maximum searching title levels

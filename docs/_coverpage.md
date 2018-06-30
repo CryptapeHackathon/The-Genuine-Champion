@@ -2,15 +2,14 @@
 
 # UniSign <small>1.0</small>
 
-> An easy cross-platform transaction signing solution
+> 跨平台的交易签名解决方案
 
-* Easy signing via QR code
-* Supports both Nervos AppChain and Ethereum
-* Private key is stored in Neuron only, encrypted and offlined
-* Quick integration with your project
+* 扫码轻松完成交易签名
+* 支持以太坊和AppChain
+* 私钥离线加密保存在Neuron，仅此一份
+* DApp开发轻松集成
 
 
 [GitHub](https://github.com/CryptapeHackathon/The-Genuine-Champion)
-[Get Started]()
-[Demo]()
+[Demo](http://118.31.229.67:8000)
 
