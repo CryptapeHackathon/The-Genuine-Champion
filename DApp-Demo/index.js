@@ -38,6 +38,8 @@ function init() {
   // hide set blocks
   document.getElementById('set_div').style.display = 'none';
 
+  
+
 }
 
 function sendBet() {
@@ -162,3 +164,5 @@ function sendResult() {
 }
 
 window.onload = init();
+
+$('.box').backgroundMove();     

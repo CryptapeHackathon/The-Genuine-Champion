@@ -1,0 +1,16 @@
+.box {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url(https://cdn.pocket-lint.com/r/s/1200x/assets/images/144638-games-news-and-the-world-cup-2018-winner-is-according-to-fifa-18-anyway-image1-gumzcvblns.jpg);
+    background-size:120%;
+    background-repeat: no-repeat;
+}
+
+.h1 {
+    
+}
