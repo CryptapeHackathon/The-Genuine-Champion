@@ -5,8 +5,8 @@ const functionAddress = {
   setWinner: "2b39bc46",
 };
 const voteFor = {
-  Argentina: "6a6170616e000000000000000000000000000000000000000000000000000000",
-  France: "6368696e61000000000000000000000000000000000000000000000000000000",
+  argentina: "6a6170616e000000000000000000000000000000000000000000000000000000",
+  france: "6368696e61000000000000000000000000000000000000000000000000000000",
 };
 let checkStatusTimer = {};
 
@@ -36,16 +36,16 @@ function init() {
   sendResultButton.addEventListener('click', sendResult);
 
   // hide set blocks
-//   document.getElementById('set_div').style.display = 'none';
-
-
-
+  //   document.getElementById('set_div').style.display = 'none';
+  $('input[name=team_bet]').click(function() {
+    $('#send_bet').removeAttr('disabled');
+  });
 }
 
 function sendBet() {
   var betValue = $('input[name=team_bet]:checked').val();
 
-  console.log(betValue);
+  console.log(betValue, voteFor[betValue]);
 
   // disable button and change text
   $('#send_bet').prop('disabled', true);
@@ -62,7 +62,12 @@ function sendBet() {
     }
   };
 
-  sendTx(txInfo, function() { qrScanCallBack(1); });
+  sendTx(txInfo, function() {
+    qrScanCallBack(1);
+    $('input[name=team_bet]').click(function() {
+      $('#send_result').removeAttr('disabled');
+    });
+  });
 }
 
 
@@ -86,7 +91,8 @@ function sendTx(txInfo, callback) {
         .empty()
         .qrcode({
           size: 150,
-          text: txInfoUrl
+          text: txInfoUrl,
+          background: "#FFFFFF",
         });
       checkStatusTimer = setInterval(function() {
         axios.get(storeServer + '/tx/status/' + response.data.uuid)
@@ -145,8 +151,8 @@ function qrScanCallBack(status) {
 }
 
 function sendResult() {
-  let teamValue = $('input[name=team_set]:checked').val();
-  console.log(teamValue);
+  let teamValue = $('input[name=team_bet]:checked').val();
+  console.log(teamValue, voteFor[teamValue]);
 
   let txInfo = {
     chain: 'cita',
