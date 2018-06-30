@@ -6,17 +6,45 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url(https://cdn.pocket-lint.com/r/s/1200x/assets/images/144638-games-news-and-the-world-cup-2018-winner-is-according-to-fifa-18-anyway-image1-gumzcvblns.jpg);
-    background-size:120%;
+    background-image: url(img/background.jpg);
+    background-size:105%;
     background-repeat: no-repeat;
+    background-position: center;
     text-align: center;
 }
 
-p,h1 {
-    color: white;
+.btn-block {
+    /* width: 30%; */
+    background-color: #ffd238;
+    padding: 10px 20px;
+    font-size: 20px;
+    border-radius: 10px;
+    border: none;
 }
 
-.btn-block {
-    width: 30%;
-    
+.flag {
+    display: block;
+    margin-top:30% !important;
 }
+
+.btn-div {
+    margin-top:20px !important;
+}
+
+img {
+    width: 100%;
+}
+
+label > input{ /* HIDE RADIO */
+    visibility: hidden; /* Makes input not-clickable */
+    position: absolute; /* Remove input from document flow */
+  }
+  label > input + img{ /* IMAGE STYLES */
+    cursor:pointer;
+    border:10px solid transparent;
+    border-radius: 10px;
+  }
+  label > input:checked + img{ /* (RADIO CHECKED) IMAGE STYLES */
+    border:10px solid #ffd238;
+    border-radius: 10px;
+  }
