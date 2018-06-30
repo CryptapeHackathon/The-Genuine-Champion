@@ -26,8 +26,3 @@ UniSign 是一个实现跨平台区块链交易签名的解决方案。
 * 支持以太坊和AppChain
 * 私钥离线加密保存在Neuron，仅此一份
 * DApp开发快速集成
-
-## UniSign Demo
-* DApp Demo
-* 收款码
-* Remix
