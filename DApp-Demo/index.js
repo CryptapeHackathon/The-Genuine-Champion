@@ -63,10 +63,16 @@ function sendBet() {
   };
 
   sendTx(txInfo, function() {
-    qrScanCallBack(1);
+    $('#send_bet').html('交易发送成功！');
+    $('input[name=team_bet]').prop('checked', false);
     $('input[name=team_bet]').click(function() {
-      $('#send_result').removeAttr('disabled');
+      $('#send_result').prop('disabled', false);
     });
+    setTimeout(function () {
+      // hide bet blocks and show set blocks
+      $('#send_bet').hide();
+      $('#send_result').show();
+    }, 1500);
   });
 }
 
@@ -94,6 +100,7 @@ function sendTx(txInfo, callback) {
           text: txInfoUrl,
           background: "#FFFFFF",
         });
+      $('#qrcode-wrapper').show();
       checkStatusTimer = setInterval(function() {
         axios.get(storeServer + '/tx/status/' + response.data.uuid)
           .then(function(response) {
@@ -103,6 +110,7 @@ function sendTx(txInfo, callback) {
                 callback(response.data);
               }
               $('#qrcode').empty();
+              $('#qrcode-wrapper').hide();
             case "denied":
             case "faied":
               clearTimer();
@@ -120,36 +128,6 @@ function sendTx(txInfo, callback) {
     });
 }
 
-function qrScanCallBack(status) {
-  //delay time
-  var delayInMilliseconds = 1500;
-
-  switch (status) {
-
-    // if user rejected
-  case 0:
-    $('#send_bet').prop('disabled', true);
-    $('#send_bet').html('用户拒绝交易！');
-    setTimeout(function () {
-      $('#send_bet').prop('disabled', false);
-      $('#send_bet').html('下注！');
-    }, delayInMilliseconds);
-    break;
-
-    //if user accepted
-  case 1:
-    // change to loading status
-    $('#send_bet').prop('disabled', true);
-    $('#send_bet').html('交易发送成功！');
-    setTimeout(function () {
-      // hide bet blocks and show set blocks
-      document.getElementById('bet_div').style.display = 'none';
-      document.getElementById('set_div').style.display = 'block';
-    }, delayInMilliseconds);
-    break;
-  }
-}
-
 function sendResult() {
   let teamValue = $('input[name=team_bet]:checked').val();
   console.log(teamValue, voteFor[teamValue]);
@@ -165,7 +143,9 @@ function sendResult() {
   };
 
   sendTx(txInfo, function() {
-    alert(teamValue + " is the winner.");
+    // alert(teamValue + " is the winner.");
+    $('#send_result').prop('disabled', true);
+    $('#send_result').html('获胜球队是：' + teamValue + ' !');
   });
 }
 
