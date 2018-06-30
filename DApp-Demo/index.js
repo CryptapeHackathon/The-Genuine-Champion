@@ -5,8 +5,8 @@ const functionAddress = {
   setWinner: "2b39bc46",
 };
 const voteFor = {
-  japan: "6a6170616e000000000000000000000000000000000000000000000000000000",
-  china: "6368696e61000000000000000000000000000000000000000000000000000000",
+  Argentina: "6a6170616e000000000000000000000000000000000000000000000000000000",
+  France: "6368696e61000000000000000000000000000000000000000000000000000000",
 };
 let checkStatusTimer = {};
 
@@ -38,7 +38,7 @@ function init() {
   // hide set blocks
   document.getElementById('set_div').style.display = 'none';
 
-  
+
 
 }
 
@@ -165,4 +165,4 @@ function sendResult() {
 
 window.onload = init();
 
-$('.box').backgroundMove();     
+$('.box').backgroundMove();
