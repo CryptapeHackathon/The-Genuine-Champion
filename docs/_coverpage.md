@@ -13,3 +13,5 @@
 [GitHub](https://github.com/CryptapeHackathon/The-Genuine-Champion)
 [Demo](http://118.31.229.67:8000)
 
+
+![](_media/background.jpg)

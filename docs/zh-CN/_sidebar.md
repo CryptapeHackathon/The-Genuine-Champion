@@ -1,2 +1,4 @@
 - [介绍](zh-CN/unisign.md)
 - [技术方案](zh-CN/tech.md)
+- [服务器API](zh-CN/server-api.md)
+- [二维码生成方案](zh-CN/server-api.md)
