@@ -15,7 +15,7 @@
 
 .btn-block {
     /* width: 30%; */
-    background-color: #ffd238;
+    background-color: #ff0000;
     padding: 10px 20px;
     font-size: 20px;
     border-radius: 10px;
@@ -41,10 +41,10 @@ label > input{ /* HIDE RADIO */
   }
   label > input + img{ /* IMAGE STYLES */
     cursor:pointer;
-    border:10px solid transparent;
-    border-radius: 10px;
+    border:5px solid transparent;
+    border-radius: 5px;
   }
   label > input:checked + img{ /* (RADIO CHECKED) IMAGE STYLES */
-    border:10px solid #ffd238;
+    border:5px solid #ff0000;
     border-radius: 10px;
   }
