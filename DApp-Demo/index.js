@@ -36,7 +36,7 @@ function init() {
   sendResultButton.addEventListener('click', sendResult);
 
   // hide set blocks
-  document.getElementById('set_div').style.display = 'none';
+//   document.getElementById('set_div').style.display = 'none';
 
 
 

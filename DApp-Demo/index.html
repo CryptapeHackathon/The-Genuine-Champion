@@ -16,52 +16,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lrsjng.jquery-qrcode/0.14.0/jquery-qrcode.min.js"></script>
 
     <!-- background -->
-    <!-- <script type="text/javascript" src="path/to/js/jquery.min.js"></script> -->
     <script type="text/javascript" src="src/jquery.backgroundMove.js"></script>
     <link rel="stylesheet" href="index.css">
 
 </head>
 
 <body>
-
     <div class="box">
-        <br>
-        <h1>世界杯猜一猜</h1>
-        <div>
-            <div id="bet_div">
-                <p>法国队对阿根廷队，究竟谁能获胜呢？</p>
-                <div>
-                    <input type="radio" name="team_bet" value="France" checked/>
-                    <label for="genderm">法国队</label>
-                    <img class="img-thumbnail" width="200" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Flag_of_France.svg/225px-Flag_of_France.svg.png">
-
+        <div class="container">
+            <div class="row flag">
+                <div class="col-md-2"></div>
+                <div class="col-md-4">
+                    <label>
+                        <input type="radio" name="team_bet" value="janpan" />
+                        <img src="img/agt.png">
+                    </label>
+                    <div class="btn-div">
+                        <button type="button" class="btn btn-block btn-primary" id="send_bet">下注！</button>
+                    </div>
                 </div>
-                <div>
-                    <input type="radio" name="team_bet" value="Argentina" />
-                    <label for="genderf">阿根廷</label>
-                    <img class="img-thumbnail" width="200" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/240px-Flag_of_Argentina.svg.png">
+                <div class="col-lg-4">
+                        <label>
+                                <input type="radio" name="team_bet" value="china" />
+                                <img src="img/fa.png">
+                            </label>
+                    <div class="btn-div">
+                        <button type="button" class="btn btn-block btn-primary" id="send_result">确认结果！</button>
+                    </div>
                 </div>
-                <br>
-                <br>
-                <button type="button" class="btn btn-block btn-primary" id="send_bet">下注！</button>
-            </div>
-
-            <div id="set_div">
-                <p>法国队对阿根廷，比赛结果是！</p>
-                <input type="radio" name="team_set" value="France" checked/>
-                <label for="genderm">法国队</label>
-                <input type="radio" name="team_set" value="Argentina" />
-                <label for="genderf">阿根廷</label>
-                <br>
-                <button type="button" class="btn btn-block btn-primary" id="send_result">确认结果！</button>
+                <div class="col-lg-2"></div>
             </div>
             <div id="qrcode" style="margin-top: 40px;"></div>
         </div>
+        
     </div>
 
+    
 
 
-    <!-- <script src="config.js"></script> -->
+
+    <script src="config.js"></script>
     <script src="index.js"></script>
 
 </body>
