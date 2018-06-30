@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,11 +25,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.nervos.neuron.R;
 import org.nervos.neuron.activity.AddWalletActivity;
-import org.nervos.neuron.activity.AppWebActivity;
 import org.nervos.neuron.activity.PayTokenActivity;
 import org.nervos.neuron.activity.QrCodeActivity;
 import org.nervos.neuron.activity.ReceiveQrCodeActivity;
-import org.nervos.neuron.activity.TokenManageActivity;
 import org.nervos.neuron.activity.TransferActivity;
 import org.nervos.neuron.activity.WalletManageActivity;
 import org.nervos.neuron.custom.TitleBar;
@@ -40,20 +37,17 @@ import org.nervos.neuron.event.TokenRefreshEvent;
 import org.nervos.neuron.item.ChainItem;
 import org.nervos.neuron.item.TokenItem;
 import org.nervos.neuron.item.WalletItem;
-import org.nervos.neuron.remote.QRCodeService;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.remote.response.TransactionInfoResponse;
-import org.nervos.neuron.service.EthRpcService;
-import org.nervos.neuron.service.NervosRpcService;
+import org.nervos.neuron.service.QrCodeService;
 import org.nervos.neuron.service.WalletService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 import org.nervos.neuron.util.db.SharePrefUtil;
 import org.nervos.neuron.util.permission.PermissionUtil;
 import org.nervos.neuron.util.permission.RuntimeRationale;
-import org.nervos.neuron.util.web.WebAppUtil;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.gson.Gson;
@@ -62,16 +56,13 @@ import com.uuzuche.lib_zxing.activity.CodeUtils;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.Response;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class WalletFragment extends BaseFragment {
 
@@ -91,7 +82,6 @@ public class WalletFragment extends BaseFragment {
     private List<TokenItem> tokenItemList = new ArrayList<>();
     private List<String> walletNameList = new ArrayList<>();
     private WalletItem walletItem;
-    private Retrofit retrofit;
     private TransactionInfo transactionInfo;
 
 
@@ -115,19 +105,12 @@ public class WalletFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
         initWalletData(true);
-        initRetrofit();
         initAdapter();
         initListener();
         initTitleBarListener();
         initRefresh();
     }
 
-    private void initRetrofit() {
-        retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantUtil.SERVER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-    }
 
     private void initWalletData(boolean showProgress) {
         if ((walletItem = DBWalletUtil.getCurrentWallet(getContext())) != null) {
@@ -190,6 +173,7 @@ public class WalletFragment extends BaseFragment {
         });
     }
 
+
     private void handlePayQrCode(String value) {
         try {
             transactionInfo = new Gson().fromJson(value, TransactionInfo.class);
@@ -197,26 +181,42 @@ public class WalletFragment extends BaseFragment {
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
             showProgressCircle();
-            QRCodeService qrCodeService = retrofit.create(QRCodeService.class);
-            qrCodeService.getTransactionInfo(value)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Response<TransactionInfoResponse>>() {
+            QrCodeService.getTransactionInfo(value)
+                .subscribe(new Subscriber<Response>() {
                     @Override
                     public void onCompleted() {
-                        dismissProgressBar();
+                        dismissProgressCircle();
                     }
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        dismissProgressBar();
+                        dismissProgressCircle();
+                        Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
                     }
                     @Override
-                    public void onNext(Response<TransactionInfoResponse> response) {
-                        if (response != null && response.body() != null) {
-                            transactionInfo = response.body().transaction;
-                            transactionInfo.uuid = value;
-                            startPayTokenPage(transactionInfo);
+                    public void onNext(Response response) {
+                        try {
+                            String result = response.body().string();
+                            if (TextUtils.isEmpty(result)) {
+                                Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            TransactionInfoResponse infoResponse = new Gson().fromJson(result,
+                                    TransactionInfoResponse.class);
+                            if (infoResponse == null) {
+                                Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            if (!TextUtils.isEmpty(infoResponse.error)) {
+                                Toast.makeText(getContext(), infoResponse.error, Toast.LENGTH_SHORT).show();
+                            } else if (infoResponse.transaction != null) {
+                                transactionInfo = infoResponse.transaction;
+                                transactionInfo.uuid = infoResponse.uuid;
+                                startPayTokenPage(transactionInfo);
+                            }
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                            Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -226,15 +226,15 @@ public class WalletFragment extends BaseFragment {
     private void startPayTokenPage(TransactionInfo transactionInfo) {
         ChainItem chainItem;
         if (transactionInfo.isEthereum()) {
-            chainItem = new ChainItem(ConstantUtil.ETH_CHAIN_ID,
-                    ConstantUtil.ETH_MAIN_NET, ConstantUtil.ETH_NODE_IP);
+            chainItem = new ChainItem(ConstUtil.ETH_CHAIN_ID,
+                    ConstUtil.ETH_MAIN_NET, ConstUtil.ETH_NODE_IP);
         } else {
-            chainItem = new ChainItem(ConstantUtil.DEFAULT_NERVOS_DEFAULT_CHAIN_ID,
-                    ConstantUtil.NERVOS_CHAIN_NAME, ConstantUtil.NERVOS_NODE_IP);
+            chainItem = new ChainItem(ConstUtil.DEFAULT_NERVOS_DEFAULT_CHAIN_ID,
+                    ConstUtil.NERVOS_CHAIN_NAME, ConstUtil.NERVOS_NODE_IP);
         }
         Intent intent = new Intent(getActivity(), PayTokenActivity.class);
-        intent.putExtra(ConstantUtil.EXTRA_PAYLOAD, new Gson().toJson(transactionInfo));
-        intent.putExtra(ConstantUtil.EXTRA_CHAIN, chainItem);
+        intent.putExtra(ConstUtil.EXTRA_PAYLOAD, new Gson().toJson(transactionInfo));
+        intent.putExtra(ConstUtil.EXTRA_CHAIN, chainItem);
         startActivity(intent);
     }
 

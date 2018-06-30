@@ -15,15 +15,15 @@ import com.google.gson.Gson;
 import org.nervos.neuron.R;
 import org.nervos.neuron.dialog.SimpleDialog;
 import org.nervos.neuron.item.ChainItem;
-import org.nervos.neuron.remote.QRCodeService;
+import org.nervos.neuron.remote.request.TransactionResult;
 import org.nervos.neuron.remote.request.TransactionResultRequest;
 import org.nervos.neuron.remote.response.TransactionInfo;
 import org.nervos.neuron.item.WalletItem;
-import org.nervos.neuron.remote.response.TransactionStatusResponse;
 import org.nervos.neuron.service.NervosRpcService;
 import org.nervos.neuron.service.EthRpcService;
+import org.nervos.neuron.service.QrCodeService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.crypto.AESCrypt;
@@ -32,12 +32,11 @@ import org.nervos.neuron.util.db.DBWalletUtil;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -68,12 +67,12 @@ public class PayTokenActivity extends BaseActivity {
     }
 
     private void initData() {
-        String payload = getIntent().getStringExtra(ConstantUtil.EXTRA_PAYLOAD);
+        String payload = getIntent().getStringExtra(ConstUtil.EXTRA_PAYLOAD);
         if (!TextUtils.isEmpty(payload)) {
             transactionInfo = new Gson().fromJson(payload, TransactionInfo.class);
         }
         walletItem = DBWalletUtil.getCurrentWallet(mActivity);
-        chainItem = getIntent().getParcelableExtra(ConstantUtil.EXTRA_CHAIN);
+        chainItem = getIntent().getParcelableExtra(ConstUtil.EXTRA_CHAIN);
         if (chainItem.chainId >= 0 && !TextUtils.isEmpty(chainItem.httpProvider)) {
             NervosRpcService.init(mActivity, chainItem.httpProvider);
         }
@@ -137,7 +136,7 @@ public class PayTokenActivity extends BaseActivity {
         findViewById(R.id.pay_reject).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resultRequest.status = ConstantUtil.TRANSACTION_DENIED;
+                resultRequest.status = ConstUtil.TRANSACTION_DENIED;
                 submitPayStatus();
 
                 setResult(AppWebActivity.RESULT_CODE_CANCEL);
@@ -233,7 +232,7 @@ public class PayTokenActivity extends BaseActivity {
                     if (TextUtils.isEmpty(transactionInfo.uuid)) {
                         gotoSignFail(e.getMessage());
                     } else {
-                        resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                        resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                         resultRequest.error = e.getMessage();
                         submitPayStatus();
                     }
@@ -247,8 +246,9 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignSuccess(ethSendTransaction.getTransactionHash());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
-                            resultRequest.transaction.hash = ethSendTransaction.getTransactionHash();
+                            resultRequest.status = ConstUtil.TRANSACTION_SUCCESS;
+                            resultRequest.transaction = new TransactionResult
+                                    (ethSendTransaction.getTransactionHash());
                             submitPayStatus();
                         }
                     } else if (ethSendTransaction.getError() != null &&
@@ -259,7 +259,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(ethSendTransaction.getError().getMessage());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = ethSendTransaction.getError().getMessage();
                             submitPayStatus();
                         }
@@ -269,7 +269,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(getString(R.string.transfer_fail));
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = getString(R.string.transfer_fail);
                             submitPayStatus();
                         }
@@ -279,7 +279,7 @@ public class PayTokenActivity extends BaseActivity {
     }
 
     private void transferNervos(String password, ProgressBar progressBar) {
-        NervosRpcService.transferNervos(transactionInfo.to, transactionInfo.getValue(), password)
+        NervosRpcService.transferNervos(transactionInfo.to, transactionInfo.getValue(), transactionInfo.data, password)
             .subscribe(new Subscriber<org.nervos.web3j.protocol.core.methods.response.EthSendTransaction>() {
                 @Override
                 public void onCompleted() {
@@ -293,7 +293,7 @@ public class PayTokenActivity extends BaseActivity {
                     if (TextUtils.isEmpty(transactionInfo.uuid)) {
                         gotoSignFail(e.getMessage());
                     } else {
-                        resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                        resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                         resultRequest.error = e.getMessage();
                         submitPayStatus();
                     }
@@ -308,8 +308,9 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignSuccess(ethSendTransaction.getSendTransactionResult().getHash());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_SUCCESS;
-                            resultRequest.transaction.hash = ethSendTransaction.getSendTransactionResult().getHash();
+                            resultRequest.status = ConstUtil.TRANSACTION_SUCCESS;
+                            resultRequest.transaction = new TransactionResult
+                                    (ethSendTransaction.getSendTransactionResult().getHash());
                             submitPayStatus();
                         }
                     } else if (ethSendTransaction.getError() != null &&
@@ -321,7 +322,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(ethSendTransaction.getError().getMessage());
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = ethSendTransaction.getError().getMessage();
                             submitPayStatus();
                         }
@@ -331,7 +332,7 @@ public class PayTokenActivity extends BaseActivity {
                         if (TextUtils.isEmpty(transactionInfo.uuid)) {
                             gotoSignFail(getString(R.string.transfer_fail));
                         } else {
-                            resultRequest.status = ConstantUtil.TRANSACTION_FAILED;
+                            resultRequest.status = ConstUtil.TRANSACTION_FAILED;
                             resultRequest.error = getString(R.string.transfer_fail);
                             submitPayStatus();
                         }
@@ -357,28 +358,27 @@ public class PayTokenActivity extends BaseActivity {
 
     private void submitPayStatus() {
         showProgressCircle();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantUtil.SERVER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        QRCodeService qrCodeService = retrofit.create(QRCodeService.class);
-        qrCodeService.submitTransactionStatus(transactionInfo.uuid, resultRequest)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Subscriber<Response<TransactionStatusResponse>>() {
+        QrCodeService.submitTransactionStatus(resultRequest, transactionInfo.uuid)
+            .subscribe(new Subscriber<Response>() {
                 @Override
                 public void onCompleted() {
                     dismissProgressCircle();
-                    finish();
                 }
                 @Override
                 public void onError(Throwable e) {
                     e.printStackTrace();
-                    dismissProgressBar();
+                    dismissProgressCircle();
+                    finish();
                 }
                 @Override
-                public void onNext(Response<TransactionStatusResponse> response) {
-
+                public void onNext(Response response) {
+                    try {
+                        String result = response.body().string();
+                        LogUtil.d("response: " + result);
+                        finish();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
     }

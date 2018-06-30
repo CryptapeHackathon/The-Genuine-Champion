@@ -1,4 +1,4 @@
-package org.nervos.neuron.response;
+package org.nervos.neuron.remote.response;
 
 import org.nervos.neuron.item.TransactionItem;
 

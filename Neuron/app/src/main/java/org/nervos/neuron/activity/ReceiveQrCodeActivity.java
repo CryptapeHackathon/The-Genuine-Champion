@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,26 +17,17 @@ import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.nervos.neuron.R;
 import org.nervos.neuron.item.WalletItem;
-import org.nervos.neuron.remote.QRCodeService;
-import org.nervos.neuron.remote.request.TransactionInfoRequest;
-import org.nervos.neuron.remote.request.TransactionResultRequest;
 import org.nervos.neuron.remote.response.TransactionInfo;
-import org.nervos.neuron.remote.response.TransactionStatusResponse;
 import org.nervos.neuron.service.EthRpcService;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.db.DBWalletUtil;
 
 import java.math.BigInteger;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class ReceiveQrCodeActivity extends BaseActivity {
@@ -93,7 +83,7 @@ public class ReceiveQrCodeActivity extends BaseActivity {
     }
 
     private void handleEthTransaction() {
-        transactionInfo.setGasLimit(ConstantUtil.GAS_LIMIT.toString());
+        transactionInfo.setGasLimit(ConstUtil.GAS_LIMIT.toString());
         showProgressCircle();
         EthRpcService.getEthGasPrice()
             .subscribeOn(Schedulers.io())
@@ -125,10 +115,10 @@ public class ReceiveQrCodeActivity extends BaseActivity {
             String category = data.getStringExtra(SetAmountActivity.EXTRA_CATEGORY);
             amountText.setText(String.format("%s %s", value, category));
             transactionInfo = new TransactionInfo(walletItem.address, value);
-            if (ConstantUtil.ETH.equalsIgnoreCase(category)) {
+            if (ConstUtil.ETH.equalsIgnoreCase(category)) {
                 handleEthTransaction();
             } else {
-                transactionInfo.setQuota(ConstantUtil.DEFAULT_QUATO);
+                transactionInfo.setQuota(ConstUtil.DEFAULT_QUATO);
                 setQrCodeImage(new Gson().toJson(transactionInfo));
             }
         }

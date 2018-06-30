@@ -3,28 +3,22 @@ pragma solidity ^0.4.19;
 
 contract WorldCupGaming {
 
-  uint32 [] private teamOdds;
-
   mapping(bytes32 => uint32) private teamMap;
   bytes32 [] private teamList;
 
-  /* mapping field below is equivalent to an associative array or hash.
-  The key of the mapping is candidate name stored as type bytes32 and value is
-  an unsigned integer to store the vote count
-  */
   struct BetInfo {
-    mapping(bytes32 => uint) map;
-    bytes32[] list;
+    bytes32 team;
+    address sender;
+    uint value;
   }
-
-  mapping(bytes32 => address[]) public betMap;
-  mapping(address => BetInfo) private betInfoMap;
-  address[] public betInfoList;
+  BetInfo[] public betInfoList;
 
   bytes32 winnerTeam;
   /* need a owner to handle the rewards*/
   address owner;
 
+  /* address[] winAddrs; */
+  /* uint[] winValues; */
 
   function WorldCupGaming(bytes32[] names) public {
     teamList = names;
@@ -38,29 +32,12 @@ contract WorldCupGaming {
     return teamList;
   }
 
-  function getOddes() public view returns (uint32 []) {
-    return teamOdds;
-  }
-
-  function getTeams(address sender) public view returns (bytes32 []) {
-    return betInfoMap[sender].list;
-  }
-
-  function getBets(bytes32 teamName) public view returns (address []) {
-    return betMap[teamName];
-  }
-
   function betForTeam(bytes32 teamName) public payable {
     require(msg.value > 0);
-    if (betInfoMap[msg.sender].list.length == 0) {
-      betMap[teamName].push(msg.sender);
-      betInfoList.push(msg.sender);
-    }
-    if (betInfoMap[msg.sender].map[teamName] == 0) {
-      betInfoMap[msg.sender].map[teamName] = 0;
-      betInfoMap[msg.sender].list.push(teamName);
-    }
-    betInfoMap[msg.sender].map[teamName] += msg.value;
+    require(teamMap[teamName] > 0);
+
+    BetInfo memory info = BetInfo(teamName, msg.sender, msg.value);
+    betInfoList.push(info);
   }
 
   /* After set the winer, the contract dispatchs the rewards automatically */
@@ -71,11 +48,27 @@ contract WorldCupGaming {
 
     winnerTeam = teamName;
 
-    var betAddressList = betMap[teamName];
-    for (uint i = 0; i < betAddressList.length; i++) {
-      var betAddress = betAddressList[i];
-      var betInfo = betInfoMap[betAddress];
-      betAddress.transfer(betInfo.map[teamName] * 2);
+    /* uint totalValue = 0; */
+    /* uint totalWinValue = 0; */
+
+    for (uint i = 0; i < betInfoList.length; i++) {
+      BetInfo storage info = betInfoList[i];
+      if (info.team == teamName) {
+        info.sender.transfer(info.value);
+        /* winAddrs.push(info.sender); */
+        /* winValues.push(info.value); */
+        /* totalWinValue += info.value; */
+      }
+      /* totalValue += info.value; */
     }
+
+    /* uint rate = totalValue * 1000 / totalWinValue; */
+    /* for (uint j = 0; j < winAddrs.length; j++) { */
+    /*   uint value = winValues[j] * rate / 1000; */
+    /*   winAddrs[j].transfer(value); */
+    /* } */
+    delete betInfoList;
+    /* delete winAddrs; */
+    /* delete winValues; */
   }
 }

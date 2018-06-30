@@ -1,0 +1,4 @@
+config.js
+contracts/*.abi
+contracts/*.bin
+contracts/*.json

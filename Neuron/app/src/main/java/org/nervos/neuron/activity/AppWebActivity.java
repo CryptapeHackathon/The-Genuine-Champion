@@ -9,7 +9,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -20,7 +19,7 @@ import org.nervos.neuron.R;
 import org.nervos.neuron.dialog.SimpleDialog;
 import org.nervos.neuron.item.WalletItem;
 import org.nervos.neuron.util.Blockies;
-import org.nervos.neuron.util.ConstantUtil;
+import org.nervos.neuron.util.ConstUtil;
 import org.nervos.neuron.util.LogUtil;
 import org.nervos.neuron.util.NumberUtil;
 import org.nervos.neuron.util.crypto.AESCrypt;
@@ -184,8 +183,8 @@ public class AppWebActivity extends BaseActivity {
                 startActivity(new Intent(mActivity, AddWalletActivity.class));
             } else {
                 Intent intent = new Intent(mActivity, PayTokenActivity.class);
-                intent.putExtra(ConstantUtil.EXTRA_PAYLOAD, tx);
-                intent.putExtra(ConstantUtil.EXTRA_CHAIN, WebAppUtil.getChainItem());
+                intent.putExtra(ConstUtil.EXTRA_PAYLOAD, tx);
+                intent.putExtra(ConstUtil.EXTRA_CHAIN, WebAppUtil.getChainItem());
                 startActivityForResult(intent, REQUEST_CODE);
             }
         }
